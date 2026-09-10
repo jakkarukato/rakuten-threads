@@ -1,0 +1,47 @@
+name: 毎日の投稿下書き作成
+
+on:
+  schedule:
+    # 毎日 00:00 UTC = 日本時間 09:00 に実行
+    - cron: "0 0 * * *"
+  # 手動実行用（テストに使う）
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Typefullyに登録せず、文面の確認だけ行う"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  create-draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 下書きを作成
+        env:
+          RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
+          RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
+          RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
+          TYPEFULLY_API_KEY: ${{ secrets.TYPEFULLY_API_KEY }}
+          TYPEFULLY_SOCIAL_SET_ID: ${{ secrets.TYPEFULLY_SOCIAL_SET_ID }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+          # 全自動投稿にしたい場合のみ 1 にする（規約リスクが上がるので非推奨）
+          AUTO_PUBLISH: "0"
+        run: node src/main.mjs
+
+      - name: 紹介済みリストをコミット
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state/posted.json
+          git diff --staged --quiet || git commit -m "chore: 紹介済み商品を記録"
+          git push
