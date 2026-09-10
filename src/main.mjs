@@ -1,6 +1,6 @@
 // ============================================================
 //  メイン処理
-//   1. 日替わりのキーワードで楽天市場を検索
+//   1. 日替わりのジャンルで楽天の売れ筋ランキングを取得
 //   2. 過去に紹介済みの商品を除外
 //   3. 紹介文を生成（#PR付き・テンプレは日替わり）
 //   4. Typefullyに当日21時の枠で下書きを登録
@@ -9,7 +9,7 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { config } from "./config.mjs";
-import { searchItems } from "./rakuten.mjs";
+import { fetchRanking } from "./rakuten.mjs";
 import { buildPostText } from "./templates.mjs";
 import { createThreadsDraft } from "./typefully.mjs";
 
@@ -20,15 +20,16 @@ const AUTO_PUBLISH = process.env.AUTO_PUBLISH === "1";
 // ---------- 日本時間の扱い ----------
 function jstParts(date = new Date()) {
   const shifted = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  const year = shifted.getUTCFullYear();
+  const month = shifted.getUTCMonth() + 1;
+  const day = shifted.getUTCDate();
   return {
-    year: shifted.getUTCFullYear(),
-    month: shifted.getUTCMonth() + 1,
-    day: shifted.getUTCDate(),
+    year,
+    month,
+    day,
     hour: shifted.getUTCHours(),
     dayOfYear: Math.floor(
-      (Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), shifted.getUTCDate()) -
-        Date.UTC(shifted.getUTCFullYear(), 0, 0)) /
-        86400000
+      (Date.UTC(year, month - 1, day) - Date.UTC(year, 0, 0)) / 86400000
     ),
   };
 }
@@ -39,8 +40,7 @@ function nextSlotIso() {
   let { year, month, day } = now;
 
   if (now.hour >= config.postHour) {
-    const tomorrow = jstParts(new Date(Date.now() + 24 * 60 * 60 * 1000));
-    ({ year, month, day } = tomorrow);
+    ({ year, month, day } = jstParts(new Date(Date.now() + 86400000)));
   }
 
   const pad = (n) => String(n).padStart(2, "0");
@@ -66,21 +66,15 @@ async function saveHistory(history) {
 
 // ---------- 本体 ----------
 async function run() {
-  if (config.githubUser === "YOUR_GITHUB_USERNAME") {
-    throw new Error(
-      "src/config.mjs の githubUser がまだ書き換えられていません。あなたのGitHubユーザー名に変更してください。"
-    );
-  }
-
   const today = jstParts();
-  const keyword = config.keywords[today.dayOfYear % config.keywords.length];
-  console.log(`本日のキーワード: ${keyword}`);
+  const genre = config.genres[today.dayOfYear % config.genres.length];
+  console.log(`本日のジャンル: ${genre.name}（genreId=${genre.id}）`);
 
   const history = await loadHistory();
   const seen = new Set(history.map((entry) => entry.itemCode));
 
-  const items = await searchItems(keyword);
-  console.log(`検索結果: ${items.length}件（条件を満たすもの）`);
+  const items = await fetchRanking(genre.id);
+  console.log(`ランキング取得: 条件を満たす商品 ${items.length}件`);
 
   const candidate = items.find((item) => !seen.has(item.itemCode));
   if (!candidate) {
@@ -88,12 +82,7 @@ async function run() {
     return;
   }
 
-  const text = buildPostText({
-    item: candidate,
-    keyword,
-    dayIndex: today.dayOfYear,
-  });
-
+  const text = buildPostText({ item: candidate, genre, dayIndex: today.dayOfYear });
   const scheduledAt = nextSlotIso();
 
   console.log("\n----- 生成された投稿文 -----");
@@ -111,7 +100,7 @@ async function run() {
     text,
     scheduledAt,
     autoPublish: AUTO_PUBLISH,
-    title: `${keyword} / ${today.year}-${today.month}-${today.day}`,
+    title: `${genre.name} / ${today.year}-${today.month}-${today.day}`,
   });
 
   console.log(`\nTypefullyに登録しました。draft id: ${draft?.id ?? "(不明)"}`);
@@ -119,7 +108,7 @@ async function run() {
   history.push({
     itemCode: candidate.itemCode,
     itemName: candidate.itemName,
-    keyword,
+    genre: genre.name,
     postedAt: scheduledAt,
   });
   await saveHistory(history);

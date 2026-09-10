@@ -3,24 +3,18 @@
 // ============================================================
 
 export const config = {
-  // GitHubユーザー名。
-  // 楽天の「許可されているウェブサイト」に登録する値と必ず一致させること。
-  // ここがズレると楽天APIが 403 HTTP_REFERRER_NOT_ALLOWED を返します。
+  // GitHubユーザー名。楽天の「許可されているウェブサイト」と一致させること。
   githubUser: "jakkarukato",
-
-  // リポジトリ名（GitHubで作るリポジトリと同じ名前にする）
   repoName: "rakuten-threads",
 
-  // 紹介する商品のキーワード。日替わりでローテーションします。
-  // 同じジャンルでも切り口を変えることで、投稿の内容が単調になるのを防ぎます。
-  keywords: [
-    "ワイヤレスイヤホン",
-    "モバイルバッテリー 大容量",
-    "デスク周り ガジェット",
-    "スマートウォッチ",
-    "USB-C 充電器",
-    "PC周辺機器 便利",
-    "スマホ アクセサリー",
+  // 紹介するジャンル。日替わりでローテーションします。
+  // キーワード検索は精度が低かったため、ジャンル指定のランキングAPIを使います。
+  // （ジャンルIDは楽天市場のカテゴリに対応。増やしたい場合はIDを追加）
+  genres: [
+    { id: 564500, name: "スマホ・タブレット",   tag: "#スマホ" },
+    { id: 100026, name: "PC・周辺機器",         tag: "#PC周辺機器" },
+    { id: 211742, name: "オーディオ・カメラ",   tag: "#ガジェット" },
+    { id: 562637, name: "家電",                 tag: "#家電" },
   ],
 
   // 投稿する時刻（日本時間）
@@ -31,20 +25,19 @@ export const config = {
   maxTextLength: 500,
 
   // 商品の抽出条件
-  search: {
-    hits: 30,              // 取得件数（1〜30）
-    minPrice: 1000,        // 安すぎる商品を除外
-    maxPrice: 30000,       // 高すぎる商品を除外
-    minReviewCount: 20,    // レビューが少ない商品を除外
-    minReviewAverage: 4.0, // 評価が低い商品を除外
+  filter: {
+    minPrice: 1000,
+    maxPrice: 50000,
+    minReviewCount: 30,
+    minReviewAverage: 4.0,
   },
 
   // 過去に紹介した商品を何件記憶しておくか（重複投稿の防止）
   historyLimit: 300,
 };
 
-// 楽天APIに送る Referer。申請時の「許可されているウェブサイト」と一致する必要があります。
-export const refererUrl = `https://${config.githubUser}.github.io/${config.repoName}/`;
-
-// 許可ドメイン欄に入力すべき値
-export const allowedDomain = `${config.githubUser}.github.io`;
+// 楽天APIに送るヘッダー。
+// ★重要: 新APIで実際に検証されるのは Origin です。Refererだけでは
+//   403 REQUEST_CONTEXT_BODY_HTTP_REFERRER_MISSING になります（実測で確認済み）。
+export const originUrl = `https://${config.githubUser}.github.io`;
+export const refererUrl = `${originUrl}/${config.repoName}/`;

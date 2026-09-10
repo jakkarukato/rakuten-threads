@@ -1,2 +1,12 @@
+# ===== 秘密情報：絶対にコミットしないこと =====
 .env
+.env.*
+!.env.example
+ID.txt
+id.txt
+*_secret*
+*secret*.txt
+*key*.txt
+
+# ===== その他 =====
 node_modules/
