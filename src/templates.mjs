@@ -104,6 +104,9 @@ function looksLikeSentence(s) {
   if (SEO_NOISE.test(s)) return false;
   // 日本語の文に空白はあまり出てこない。多いものは語の羅列とみなす
   if ((s.match(/[\s\u3000]/g) ?? []).length > 3) return false;
+  // 「Bluetoothイヤホンマイク」のような名詞の羅列を弾く。
+  //   文章であれば助詞や活用語尾のひらがなが必ず混ざる。
+  if ((s.match(/[\u3041-\u3096]/g) ?? []).length < 4) return false;
   return true;
 }
 
@@ -223,7 +226,7 @@ const render = (lines) =>
  * - アフィリエイトURLの空白類は除去（改行混入でリンクが切れるのを防ぐ）
  * - 500文字に収まるよう、スペック → 説明の一文 → 見出し の順に削る
  */
-export function buildPostText({ item, genre, dayIndex }) {
+export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
   const header = "【PR】";
   const url = String(item.affiliateUrl).replace(/\s+/g, "");
   const tags = ["#楽天市場", genre.tag].filter(Boolean).join(" ");
@@ -264,7 +267,7 @@ export function buildPostText({ item, genre, dayIndex }) {
       })
     );
     const text = `${header}\n${body}\n\n${footer}`;
-    if (text.length <= config.maxTextLength) return text;
+    if (text.length <= config.maxTextLength - reserve) return text;
   }
 
   const minimal = `${header}\n${cleanItemName(item.itemName, 30)}\n${base.price}\n\n${footer}`;

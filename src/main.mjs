@@ -75,7 +75,13 @@ async function run() {
     return;
   }
 
-  const text = buildPostText({ item: candidate, genre, dayIndex: today.dayOfYear });
+  const text = buildPostText({
+    item: candidate,
+    genre,
+    dayIndex: today.dayOfYear,
+    // 承認時のコメントを入れる余白を残しておく
+    reserve: config.commentReserve,
+  });
 
   console.log("\n----- 生成された投稿文 -----");
   console.log(text);
@@ -111,8 +117,13 @@ async function run() {
       text,
       "```",
       ``,
-      `問題なければ下の **Review deployments** から承認してください。`,
-      `承認すると Threads に投稿されます。承認しなければ投稿されません。`,
+      `**承認するときのコメント欄に一言書くと、その文が投稿の先頭に入ります。**`,
+      ``,
+      `「どこが良いと思ったか」「誰に向いていそうか」を1行書くだけで、`,
+      `スペックの羅列とは別物になります。空欄のままでも投稿はできます。`,
+      ``,
+      `下の **Review deployments** から承認してください。`,
+      `承認しなければ投稿されません。`,
     ].join("\n")
   );
 }

@@ -24,6 +24,10 @@ export const config = {
   // Threadsの1投稿あたりの上限文字数
   maxTextLength: 500,
 
+  // 承認時にあなたが書く一言のために空けておく文字数。
+  // 自動生成の本文はこの分だけ短く作られる。
+  commentReserve: 110,
+
   // 商品の抽出条件
   filter: {
     minPrice: 1000,
