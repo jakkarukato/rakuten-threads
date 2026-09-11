@@ -80,8 +80,15 @@ export function buildPostText({ item, genre, dayIndex }) {
   const body = templates[dayIndex % templates.length](item, genre);
   const tags = ["#楽天市場", genre.tag].filter(Boolean).slice(0, 2).join(" ");
 
-  const header = "#PR";
-  const footer = `${item.affiliateUrl}\n\n${tags}`;
+  // ★広告表記。Threadsは先頭のハッシュタグをトピックタグとして本文から抜くため、
+  //   「#PR」と書くと「PR」になってしまう。景表法・楽天規約の必須項目なので
+  //   ハッシュタグに依存しない形で置く。
+  const header = "【PR】";
+
+  // ★楽天のaffiliateUrlは改行が混入した形式を返すことがある。
+  //   そのまま貼るとリンクが途中で切れて踏めなくなるため、空白類を全て除去する。
+  const url = String(item.affiliateUrl).replace(/\s+/g, "");
+  const footer = `${url}\n\n${tags}`;
 
   let text = `${header}\n${body}\n\n${footer}`;
 
