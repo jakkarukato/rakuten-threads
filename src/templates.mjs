@@ -94,25 +94,42 @@ export function extractSpecs(rawName, limit = 4) {
 
 /** 商品説明文を「見出し」と「続く一文」に分ける */
 // 楽天の商品説明には、検索対策としてギフト用途の語が大量に並べられていることが多い。
-// 「季節を問わずに使える」→「お正月 御正月 お年賀 御年賀 …」のような箇所は文章ではないので弾く。
-const SEO_NOISE =
-  /(お?正月|御?年賀|御?年始|お?中元|お?歳暮|母の日|父の日|敬老の日|バレンタイン|ホワイトデー|クリスマス|ハロウィン|お盆|帰省|ゴールデンウィーク|シルバーウィーク|大型連休|入学祝|卒業祝|就職祝|還暦|内祝|快気祝|香典返し|お返し|ギフト|プレゼント|贈り物|贈答|季節を問わ|誕生日|記念日|送料無料|ポイント|クーポン|ランキング|楽天|1位|１位)/;
+// ------------------------------------------------------------
+//  商品説明文の選別
+//
+//  itemCaption は店舗が自由に書く欄で、次のものが混在している。
+//    ・検索対策のキーワード羅列（「お正月 御年賀 お中元 …」）
+//    ・特定商取引法などの法定表記（「当店は日本国内に所在する事業者であります」）
+//    ・配送や返品の案内
+//    ・本来欲しい商品説明
+//
+//  禁止語を足し続けてもきりがないため、「商品の説明文らしさ」を
+//  満たすものだけを通す方式にしている。
+// ------------------------------------------------------------
 
-/** キーワードの羅列ではなく、文章として読めるか */
-function looksLikeSentence(s) {
+// 商品説明の文末や言い回しに現れる語（これが無ければ採用しない）
+const PRODUCT_MARK =
+  /(搭載|対応|可能|実現|採用|設計|備え|使える|楽しめ|聴け|持ち運|軽量|コンパクト|長時間|快適|防水|防塵|充電|接続|音質|操作|装着)/;
+
+// 店舗都合・法定表記・販促の語（ひとつでもあれば落とす）
+const NOT_PRODUCT =
+  /(当店|弊社|当社|事業者|注文|ご購入|個人情報|提供いたし|返品|交換|キャンセル|配送|発送|送料|営業日|お問い合わせ|問合せ|免責|規約|保証書|領収書|ラッピング|のし|熨斗|在庫|入荷|メーカー希望|定価|税込|税別|お?正月|御?年賀|御?年始|お?中元|お?歳暮|母の日|父の日|敬老の日|バレンタイン|ホワイトデー|クリスマス|ハロウィン|お盆|帰省|ゴールデンウィーク|大型連休|内祝|快気祝|香典返し|ギフト|プレゼント|贈り物|贈答|季節を問わ|誕生日|クーポン|ポイント|ランキング|楽天|1位|１位)/;
+
+/** 商品の説明文として使える一文か */
+function looksLikeProductSentence(s) {
   if (!s) return false;
-  if (SEO_NOISE.test(s)) return false;
+  if (NOT_PRODUCT.test(s)) return false;
+  if (!PRODUCT_MARK.test(s)) return false;
   // 日本語の文に空白はあまり出てこない。多いものは語の羅列とみなす
   if ((s.match(/[\s\u3000]/g) ?? []).length > 3) return false;
-  // 「Bluetoothイヤホンマイク」のような名詞の羅列を弾く。
-  //   文章であれば助詞や活用語尾のひらがなが必ず混ざる。
-  if ((s.match(/[\u3041-\u3096]/g) ?? []).length < 4) return false;
+  // 名詞の羅列を弾く。文章なら助詞や活用語尾のひらがなが混ざる
+  if ((s.match(/[\u3041-\u3096]/g) ?? []).length < 6) return false;
   return true;
 }
 
 /**
- * 商品説明文から、文章として読める部分を2つ取り出す。
- * 1つ目を見出し、2つ目を補足として使う。
+ * 商品説明文から、商品の説明として読める一文を取り出す。
+ * 条件を満たすものが無ければ空文字を返す（説明文は省略される）。
  */
 export function extractCaption(caption) {
   if (!caption) return { hook: "", detail: "" };
@@ -122,7 +139,6 @@ export function extractCaption(caption) {
     .replace(/&[#a-z0-9]+;/gi, " ")
     .trim();
 
-  // 「。」の直後と空白で区切る。見出しは空白で、本文は「。」で切れている
   const segments = text
     .split(/(?<=。)|[\s\u3000]+/)
     .map((s) => s.trim().replace(/。$/, ""))
@@ -130,14 +146,47 @@ export function extractCaption(caption) {
 
   const good = [];
   for (const s of segments) {
-    if (s.length < 12 || s.length > 64) continue;
-    if (!looksLikeSentence(s)) continue;
+    if (s.length < 14 || s.length > 60) continue;
+    if (!looksLikeProductSentence(s)) continue;
     if (good.some((g) => g.includes(s) || s.includes(g))) continue;
     good.push(s);
     if (good.length >= 2) break;
   }
 
   return { hook: good[0] ?? "", detail: good[1] ?? "" };
+}
+
+// ------------------------------------------------------------
+//  スペックの意味を平易な言葉にする
+//
+//  「なぜ良いか」は商品を使っていないと書けない（書けば嘘になる）が、
+//  「そのスペックが何を意味するか」は用語の言い換えなので事実として書ける。
+// ------------------------------------------------------------
+const SPEC_NOTES = [
+  [/ノイズキャンセリング|ノイキャン|ANC/i, "周りの音を抑えて聴ける"],
+  [/骨伝導/, "耳をふさがずに聴ける"],
+  [/マルチポイント/, "スマホとPCに同時につないでおける"],
+  [/外音取り込み|アンビエント|外音/, "つけたまま人と話せる"],
+  [/低遅延|ゲーミングモード|ゲームモード/, "動画やゲームで音がズレにくい"],
+  [/ワイヤレス充電|Qi|置くだけ/i, "置くだけで充電できる"],
+  [/GaN|窒化ガリウム/i, "同じ出力でも小さくて軽い"],
+  [/急速充電|高速充電|PD|Power ?Delivery/i, "短い時間で充電できる"],
+  [/(\d+)\s*時間(再生|駆動|連続)/, "充電の頻度が少なくて済む"],
+  [/大容量|\d+mAh/i, "スマホを何度も充電できる"],
+  [/IP\d\d|IPX\d|防水|防滴|防塵/i, "水や汗に強い"],
+  [/折りたた|折り畳|コンパクト|軽量/, "持ち運びやすい"],
+  [/ハイレゾ|LDAC|aptX/i, "音源の情報量を落とさずに聴ける"],
+  [/タッチ操作|タッチセンサー/, "本体を触るだけで操作できる"],
+];
+
+/** スペックの中から、意味を説明できるものを1つ選んで一言にする */
+export function pickSpecNote(specs) {
+  for (const spec of specs) {
+    for (const [pattern, note] of SPEC_NOTES) {
+      if (pattern.test(spec)) return note;
+    }
+  }
+  return "";
 }
 
 const yen = (price) => `${Number(price).toLocaleString("ja-JP")}円`;
@@ -153,63 +202,61 @@ const stars = (average) => {
 // ------------------------------------------------------------
 const variants = [
   (f) => [
-    f.hook ? `${f.hook}。` : null,
+    f.lead,
     "",
     f.name,
-    "",
-    f.detail ? `${f.detail}。` : null,
-    f.specs.length ? "" : null,
-    ...f.specs.map((s) => `・${s}`),
-    "",
     `${f.price} / ${f.stars}（レビュー${f.reviewCount}件）`,
+    "",
+    ...f.specs.map((s) => `・${s}`),
+    f.note ? `\n${f.note}のがこのへんの強み。` : null,
+    f.detail ? `\n${f.detail}。` : null,
   ],
 
   (f) => [
-    `${f.genre.name}ランキング${f.rank}位。`,
+    f.lead,
     "",
     f.name,
-    `${f.price}　${f.stars}（${f.reviewCount}件）`,
     "",
-    f.hook ? `${f.hook}。` : null,
-    f.detail ? `${f.detail}。` : null,
-    f.specs.length ? "" : null,
     ...f.specs.map((s) => `・${s}`),
+    f.note ? `\n${f.note}。` : null,
+    "",
+    `${f.price}　${f.stars}（${f.reviewCount}件）`,
+    f.detail ? `\n${f.detail}。` : null,
   ],
 
   (f) => [
-    `レビュー${f.reviewCount}件で${f.reviewAverage}。これは気になる。`,
+    `レビュー${f.reviewCount}件で${f.reviewAverage}。`,
     "",
     f.name,
     f.price,
     "",
-    f.hook ? `${f.hook}。` : null,
-    f.detail ? `${f.detail}。` : null,
-    f.specs.length ? "" : null,
     ...f.specs.map((s) => `・${s}`),
+    f.note ? `\n${f.note}らしい。` : null,
+    f.detail ? `\n${f.detail}。` : null,
   ],
 
   (f) => [
-    f.hook ? `${f.hook}。` : `いま${f.genre.name}で売れてるやつ。`,
+    f.lead,
     "",
     f.name,
     "",
+    f.detail ? `${f.detail}。\n` : null,
     ...f.specs.map((s) => `・${s}`),
-    f.specs.length ? "" : null,
-    f.detail ? `${f.detail}。` : null,
+    f.note ? `\n${f.note}。` : null,
     "",
     `${f.price} / ${f.stars} ${f.reviewCount}件のレビュー`,
   ],
 
   (f) => [
     f.name,
-    "",
-    f.hook ? `${f.hook}。` : null,
-    f.detail ? `${f.detail}。` : null,
-    f.specs.length ? "" : null,
-    ...f.specs.map((s) => `・${s}`),
-    "",
     `${f.price}`,
-    `${f.stars}（${f.reviewCount}件）`,
+    "",
+    f.lead,
+    "",
+    ...f.specs.map((s) => `・${s}`),
+    f.note ? `\n${f.note}。` : null,
+    "",
+    `${f.stars}（レビュー${f.reviewCount}件）`,
   ],
 ];
 
@@ -224,7 +271,7 @@ const render = (lines) =>
  * 投稿文を組み立てる。
  * - 先頭に【PR】（Threadsは先頭のハッシュタグを本文から抜くため #PR は使わない）
  * - アフィリエイトURLの空白類は除去（改行混入でリンクが切れるのを防ぐ）
- * - 500文字に収まるよう、スペック → 説明の一文 → 見出し の順に削る
+ * - 500文字に収まるよう、説明文 → スペックの意味 → スペック の順に削る
  */
 export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
   const header = "【PR】";
@@ -234,8 +281,13 @@ export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
 
   const allSpecs = extractSpecs(item.itemName);
   const { hook, detail } = extractCaption(item.itemCaption);
+  const note = pickSpecNote(allSpecs);
+
+  // 書き出しの一行。商品説明が使えればそれ、無ければ順位で始める。
+  const lead = hook ? `${hook}。` : `${genre.name}ランキング${item.rank}位。`;
 
   const base = {
+    lead,
     name: cleanItemName(item.itemName),
     price: yen(item.itemPrice),
     stars: stars(item.reviewAverage),
@@ -250,9 +302,9 @@ export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
   // 情報量の多い順に試し、収まった時点で採用する
   const plans = [];
   for (const keepDetail of [true, false]) {
-    for (const keepHook of [true, false]) {
+    for (const keepNote of [true, false]) {
       for (let n = allSpecs.length; n >= 0; n--) {
-        plans.push({ n, keepDetail, keepHook });
+        plans.push({ n, keepDetail, keepNote });
       }
     }
   }
@@ -262,7 +314,7 @@ export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
       variant({
         ...base,
         specs: allSpecs.slice(0, plan.n),
-        hook: plan.keepHook ? hook : "",
+        note: plan.keepNote ? note : "",
         detail: plan.keepDetail ? detail : "",
       })
     );
