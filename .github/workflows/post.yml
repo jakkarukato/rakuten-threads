@@ -21,9 +21,9 @@ jobs:
     outputs:
       has_post: ${{ steps.gen.outputs.has_post }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
 
@@ -37,7 +37,7 @@ jobs:
 
       - name: 投稿内容を受け渡し
         if: steps.gen.outputs.has_post == '1'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: post
           path: out/post.json
@@ -51,13 +51,13 @@ jobs:
     # ★この environment に承認者を設定することで、投稿前に人の確認が入ります
     environment: threads-post
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: post
           path: out
