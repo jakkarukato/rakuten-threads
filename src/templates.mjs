@@ -285,8 +285,12 @@ export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
   const { hook, detail } = extractCaption(item.itemCaption);
   const note = pickSpecNote(allSpecs);
 
-  // 書き出しの一行。商品説明が使えればそれ、無ければ順位で始める。
-  const lead = hook ? `${hook}。` : `${genre.name}ランキング${item.rank}位。`;
+  // 書き出しの一行。商品説明が使えればそれ、無ければ上位のときだけ順位で始める。
+  const lead = hook
+    ? `${hook}。`
+    : Number(item.rank) <= config.rankThreshold
+      ? `${genre.name}ランキング${item.rank}位。`
+      : null;
 
   const base = {
     lead,
