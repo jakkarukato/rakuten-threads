@@ -275,6 +275,41 @@ const render = (lines) =>
  * - アフィリエイトURLの空白類は除去（改行混入でリンクが切れるのを防ぐ）
  * - 500文字に収まるよう、説明文 → スペックの意味 → スペック の順に削る
  */
+// ------------------------------------------------------------
+//  締めの一行
+//
+//  Threadsは会話量で評価されるため、返信を誘う一文を入れる。
+//  ★事実の主張を含まない質問だけを置いている。
+//    「探してる」「迷ってる」のような書き手の状況は、
+//    プログラムが言えば捏造になるので入れていない。
+//    それを書きたいときは、承認時のコメント欄に人が書く。
+// ------------------------------------------------------------
+const QUESTIONS = [
+  "これ使ってる人おったら感想聞きたい。",
+  "同じ価格帯で他に候補ある？",
+  "この手のやつ、何を基準に選んでる？",
+  "実物を触ってから買う派？ レビューだけで決める派？",
+  "安いのを何個も買うのと、高いのを一個買うの、どっち派？",
+  "買い替えのきっかけって、だいたい何ですか。",
+];
+
+/** 事実だけで書ける、数字についての一言 */
+function dataRemark(item) {
+  const count = Number(item.reviewCount);
+  const average = Number(item.reviewAverage);
+  if (count >= 300 && average >= 4.5) {
+    return `レビュー${count}件で★${average.toFixed(1)}。母数が多いぶん参考にしやすい。`;
+  }
+  return "";
+}
+
+/**
+ * 投稿文を組み立てる。
+ * - 先頭に【PR】（Threadsは先頭のハッシュタグを本文から抜くため #PR は使わない）
+ * - アフィリエイトURLの空白類は除去（改行混入でリンクが切れるのを防ぐ）
+ * - 500文字に収まるよう、説明文 → 数字の一言 → スペックの意味 → スペック の順に削る
+ * - reserve を指定すると、承認時に人が書く一言のぶん余白を残す
+ */
 export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
   const header = "【PR】";
   const url = String(item.affiliateUrl).replace(/\s+/g, "");
@@ -284,6 +319,10 @@ export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
   const allSpecs = extractSpecs(item.itemName);
   const { hook, detail } = extractCaption(item.itemCaption);
   const note = pickSpecNote(allSpecs);
+
+  // 締めの質問と、数字についての一言
+  const closer = QUESTIONS[dayIndex % QUESTIONS.length];
+  const remark = dataRemark(item);
 
   // 書き出しの一行。商品説明が使えればそれ、無ければ上位のときだけ順位で始める。
   const lead = hook
@@ -307,10 +346,12 @@ export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
 
   // 情報量の多い順に試し、収まった時点で採用する
   const plans = [];
-  for (const keepDetail of [true, false]) {
-    for (const keepNote of [true, false]) {
-      for (let n = allSpecs.length; n >= 0; n--) {
-        plans.push({ n, keepDetail, keepNote });
+  for (const keepRemark of [true, false]) {
+    for (const keepDetail of [true, false]) {
+      for (const keepNote of [true, false]) {
+        for (let n = allSpecs.length; n >= 0; n--) {
+          plans.push({ n, keepDetail, keepNote, keepRemark });
+        }
       }
     }
   }
@@ -324,7 +365,10 @@ export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
         detail: plan.keepDetail ? detail : "",
       })
     );
-    const text = `${header}\n${body}\n\n${footer}`;
+    const parts = [body];
+    if (plan.keepRemark && remark) parts.push(remark);
+    parts.push(closer);
+    const text = header + "\n" + parts.join("\n\n") + "\n\n" + footer;
     if (text.length <= config.maxTextLength - reserve) return text;
   }
 
