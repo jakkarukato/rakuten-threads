@@ -287,11 +287,31 @@ const render = (lines) =>
 const QUESTIONS = [
   "これ使ってる人おったら感想聞きたい。",
   "同じ価格帯で他に候補ある？",
-  "この手のやつ、何を基準に選んでる？",
+  "この手のやつ、何を基準に選んでます？",
   "実物を触ってから買う派？ レビューだけで決める派？",
   "安いのを何個も買うのと、高いのを一個買うの、どっち派？",
   "買い替えのきっかけって、だいたい何ですか。",
+  "レビューって何件からなら信用します？",
+  "セールまで待つ派？ 欲しいときに買う派？",
+  "同じ用途で「これで十分やった」ってもの、あります？",
+  "買う前にどこまで調べます？ 口コミ？ 動画？",
+  "高いの買って後悔したこと、あります？",
+  "安物買いの銭失い、何でやりました？",
+  "メーカーで選ぶ？ スペックで選ぶ？",
+  "値段以外で決め手になるものって、何ですか。",
+  "保証期間って気にする派？",
+  "色で迷うこと、あります？",
+  "「もっと早く買えばよかった」と思ったもの、あります？",
+  "型落ちを狙う派？ 最新にする派？",
+  "実店舗で見てからネットで買う派？",
+  "これ、人に勧めるとしたら誰に勧めます？",
 ];
+
+/** 共通の質問とジャンル別の質問を混ぜて、日替わりで1つ選ぶ */
+function pickQuestion(genre, dayIndex) {
+  const pool = [...QUESTIONS, ...(genre.questions ?? [])];
+  return pool[dayIndex % pool.length];
+}
 
 /** 事実だけで書ける、数字についての一言 */
 function dataRemark(item) {
@@ -321,7 +341,7 @@ export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
   const note = pickSpecNote(allSpecs);
 
   // 締めの質問と、数字についての一言
-  const closer = QUESTIONS[dayIndex % QUESTIONS.length];
+  const closer = pickQuestion(genre, dayIndex);
   const remark = dataRemark(item);
 
   // 書き出しの一行。商品説明が使えればそれ、無ければ上位のときだけ順位で始める。
