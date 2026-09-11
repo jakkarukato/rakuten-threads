@@ -75,12 +75,9 @@ async function run() {
     return;
   }
 
-  // 締めの質問は、直近20投稿で使ったものを避けて選ぶ
-  const recentQuestions = history
-    .slice(-20)
-    .map((entry) => entry.question)
-    .filter(Boolean);
-  const question = pickQuestion(genre, recentQuestions);
+  // 締めの質問は、これまでに使ったものを避けて選ぶ（全部使い切るまで同じ質問は出ない）
+  const usedQuestions = history.map((entry) => entry.question).filter(Boolean);
+  const question = pickQuestion(genre, usedQuestions);
 
   const text = buildPostText({
     item: candidate,

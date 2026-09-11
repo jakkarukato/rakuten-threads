@@ -13,6 +13,7 @@
 // ============================================================
 
 import { config } from "./config.mjs";
+import { SHARED_QUESTIONS, GENRE_QUESTIONS } from "./questions.mjs";
 
 // 販促文言。スペックとして扱いたくないもの
 const PROMO =
@@ -325,39 +326,26 @@ const render = (lines) =>
 //    プログラムが言えば捏造になるので入れていない。
 //    それを書きたいときは、承認時のコメント欄に人が書く。
 // ------------------------------------------------------------
-const QUESTIONS = [
-  "これ使ってる人おったら感想聞きたい。",
-  "同じ価格帯で他に候補ある？",
-  "この手のやつ、何を基準に選んでます？",
-  "実物を触ってから買う派？ レビューだけで決める派？",
-  "安いのを何個も買うのと、高いのを一個買うの、どっち派？",
-  "買い替えのきっかけって、だいたい何ですか。",
-  "レビューって何件からなら信用します？",
-  "セールまで待つ派？ 欲しいときに買う派？",
-  "同じ用途で「これで十分やった」ってもの、あります？",
-  "買う前にどこまで調べます？ 口コミ？ 動画？",
-  "高いの買って後悔したこと、あります？",
-  "安物買いの銭失い、何でやりました？",
-  "メーカーで選ぶ？ スペックで選ぶ？",
-  "値段以外で決め手になるものって、何ですか。",
-  "保証期間って気にする派？",
-  "色で迷うこと、あります？",
-  "「もっと早く買えばよかった」と思ったもの、あります？",
-  "型落ちを狙う派？ 最新にする派？",
-  "実店舗で見てからネットで買う派？",
-  "これ、人に勧めるとしたら誰に勧めます？",
-];
-
 /**
- * 締めの質問を1つ選ぶ。
- * 共通の質問とジャンル別の質問を合わせた中から、直近の投稿で使ったものを避けてランダムに選ぶ。
- * （以前は日付で決めていたため、同じ日は何度実行しても同じ質問になり、
- *   さらにジャンルの周期と質問数が割り切れて、使われない質問が大半になっていた）
+ * 締めの質問を1つ選ぶ。質問そのものは questions.mjs にある。
+ *
+ * まだ一度も使っていない質問からランダムに選ぶ。全部使い切ったら、
+ * いちばん昔に使ったもの（上位10個）から選ぶ。これで全質問を一巡するまで同じ質問は出ない。
+ *
+ * @param {object} genre config.mjs の genres の要素
+ * @param {string[]} usedQuestions これまでに投稿した質問（古い順）
  */
-export function pickQuestion(genre, recentQuestions = []) {
-  const pool = [...QUESTIONS, ...(genre.questions ?? [])];
-  const fresh = pool.filter((q) => !recentQuestions.includes(q));
-  const choices = fresh.length ? fresh : pool;
+export function pickQuestion(genre, usedQuestions = []) {
+  const pool = [...SHARED_QUESTIONS, ...(GENRE_QUESTIONS[genre.id] ?? [])];
+
+  const lastUsed = new Map();
+  usedQuestions.forEach((q, i) => lastUsed.set(q, i));
+
+  const unused = pool.filter((q) => !lastUsed.has(q));
+  const choices = unused.length
+    ? unused
+    : [...pool].sort((a, b) => lastUsed.get(a) - lastUsed.get(b)).slice(0, 10);
+
   return choices[Math.floor(Math.random() * choices.length)];
 }
 
