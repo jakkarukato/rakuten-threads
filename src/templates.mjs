@@ -93,6 +93,24 @@ export function extractSpecs(rawName, limit = 4) {
 }
 
 /** 商品説明文を「見出し」と「続く一文」に分ける */
+// 楽天の商品説明には、検索対策としてギフト用途の語が大量に並べられていることが多い。
+// 「季節を問わずに使える」→「お正月 御正月 お年賀 御年賀 …」のような箇所は文章ではないので弾く。
+const SEO_NOISE =
+  /(お?正月|御?年賀|御?年始|お?中元|お?歳暮|母の日|父の日|敬老の日|バレンタイン|ホワイトデー|クリスマス|ハロウィン|お盆|帰省|ゴールデンウィーク|シルバーウィーク|大型連休|入学祝|卒業祝|就職祝|還暦|内祝|快気祝|香典返し|お返し|ギフト|プレゼント|贈り物|贈答|季節を問わ|誕生日|記念日|送料無料|ポイント|クーポン|ランキング|楽天|1位|１位)/;
+
+/** キーワードの羅列ではなく、文章として読めるか */
+function looksLikeSentence(s) {
+  if (!s) return false;
+  if (SEO_NOISE.test(s)) return false;
+  // 日本語の文に空白はあまり出てこない。多いものは語の羅列とみなす
+  if ((s.match(/[\s\u3000]/g) ?? []).length > 3) return false;
+  return true;
+}
+
+/**
+ * 商品説明文から、文章として読める部分を2つ取り出す。
+ * 1つ目を見出し、2つ目を補足として使う。
+ */
 export function extractCaption(caption) {
   if (!caption) return { hook: "", detail: "" };
 
@@ -101,28 +119,22 @@ export function extractCaption(caption) {
     .replace(/&[#a-z0-9]+;/gi, " ")
     .trim();
 
-  // 多くの店舗は「見出し（空白）本文…」の形で書いている
-  const parts = text.split(/[\s\u3000]+/);
-  let hook = parts[0] ?? "";
-  let rest = parts.slice(1).join(" ");
+  // 「。」の直後と空白で区切る。見出しは空白で、本文は「。」で切れている
+  const segments = text
+    .split(/(?<=。)|[\s\u3000]+/)
+    .map((s) => s.trim().replace(/。$/, ""))
+    .filter(Boolean);
 
-  if (hook.length < 8 || hook.length > 52) {
-    // 見出しらしきものが取れないときは最初の一文を見出しにする
-    const sentences = text.split(/(?<=。)/);
-    hook = (sentences[0] ?? "").trim();
-    rest = sentences.slice(1).join("");
+  const good = [];
+  for (const s of segments) {
+    if (s.length < 12 || s.length > 64) continue;
+    if (!looksLikeSentence(s)) continue;
+    if (good.some((g) => g.includes(s) || s.includes(g))) continue;
+    good.push(s);
+    if (good.length >= 2) break;
   }
 
-  hook = hook.replace(/[\s\u3000]+/g, " ").replace(/。$/, "").trim();
-  if (hook.length > 52) hook = hook.slice(0, 51) + "…";
-  if (hook.length < 6) hook = "";
-
-  // 続く説明の一文
-  let detail = (rest.split(/(?<=。)/)[0] ?? "").replace(/[\s\u3000]+/g, " ").trim();
-  if (detail.length > 64) detail = detail.slice(0, 63) + "…";
-  if (detail.length < 12) detail = "";
-
-  return { hook, detail };
+  return { hook: good[0] ?? "", detail: good[1] ?? "" };
 }
 
 const yen = (price) => `${Number(price).toLocaleString("ja-JP")}円`;
@@ -142,7 +154,7 @@ const variants = [
     "",
     f.name,
     "",
-    f.detail || null,
+    f.detail ? `${f.detail}。` : null,
     f.specs.length ? "" : null,
     ...f.specs.map((s) => `・${s}`),
     "",
@@ -156,7 +168,7 @@ const variants = [
     `${f.price}　${f.stars}（${f.reviewCount}件）`,
     "",
     f.hook ? `${f.hook}。` : null,
-    f.detail || null,
+    f.detail ? `${f.detail}。` : null,
     f.specs.length ? "" : null,
     ...f.specs.map((s) => `・${s}`),
   ],
@@ -168,7 +180,7 @@ const variants = [
     f.price,
     "",
     f.hook ? `${f.hook}。` : null,
-    f.detail || null,
+    f.detail ? `${f.detail}。` : null,
     f.specs.length ? "" : null,
     ...f.specs.map((s) => `・${s}`),
   ],
@@ -180,7 +192,7 @@ const variants = [
     "",
     ...f.specs.map((s) => `・${s}`),
     f.specs.length ? "" : null,
-    f.detail || null,
+    f.detail ? `${f.detail}。` : null,
     "",
     `${f.price} / ${f.stars} ${f.reviewCount}件のレビュー`,
   ],
@@ -189,7 +201,7 @@ const variants = [
     f.name,
     "",
     f.hook ? `${f.hook}。` : null,
-    f.detail || null,
+    f.detail ? `${f.detail}。` : null,
     f.specs.length ? "" : null,
     ...f.specs.map((s) => `・${s}`),
     "",
