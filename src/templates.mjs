@@ -57,6 +57,8 @@ export function extractSpecs(rawName, limit = 4) {
 
   // 【】の中身は「/」区切りが多い
   for (const m of raw.matchAll(/[【\[]([^】\]]+)[】\]]/g)) {
+    // 販促の【】（クーポン期間など）は、割ると日時の断片が残るのでブロックごと捨てる
+    if (PROMO.test(m[1])) continue;
     candidates.push(...m[1].split(/[\/・、,|｜]/));
   }
 
@@ -82,6 +84,8 @@ export function extractSpecs(rawName, limit = 4) {
   for (const c of candidates) {
     const s = c.trim().replace(/[、。]$/, "");
     if (s.length < 4 || s.length > 16) continue;
+    // 「11 01:59」のような数字と記号だけの断片を弾く
+    if ((s.match(/\p{L}/gu) ?? []).length < 2) continue;
     if (PROMO.test(s)) continue;
     if (NOISE.has(s)) continue;
     if (head.includes(s)) continue;
@@ -337,7 +341,20 @@ export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
   const footer = `${url}\n\n${tags}`;
 
   const allSpecs = extractSpecs(item.itemName);
-  const { hook, detail } = extractCaption(item.itemCaption);
+  // 商品説明文は既定で使わない（config.useCaption を参照）
+  const { hook, detail } = config.useCaption
+    ? extractCaption(item.itemCaption)
+    : { hook: "", detail: "" };
+
+  // 商品名の中にスペックが出てきたら、そこで名前を切る。
+  // 「|」の無い商品名はスペックが名前に混ざっていて、箇条書きと二重になるため。
+  let fullName = cleanItemName(item.itemName, 200);
+  const cutAt = allSpecs
+    .map((spec) => fullName.indexOf(spec))
+    .filter((i) => i > 6)
+    .sort((a, b) => a - b)[0];
+  if (cutAt !== undefined) fullName = fullName.slice(0, cutAt).trim();
+  const displayName = fullName.length > 52 ? fullName.slice(0, 51) + "…" : fullName;
   const note = pickSpecNote(allSpecs);
 
   // 締めの質問と、数字についての一言
@@ -353,7 +370,7 @@ export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
 
   const base = {
     lead,
-    name: cleanItemName(item.itemName),
+    name: displayName,
     price: yen(item.itemPrice),
     stars: stars(item.reviewAverage),
     reviewCount: item.reviewCount,
