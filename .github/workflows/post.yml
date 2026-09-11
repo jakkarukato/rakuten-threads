@@ -1,0 +1,77 @@
+name: Threadsへの投稿
+
+on:
+  schedule:
+    # 毎日 11:50 UTC = 日本時間 20:50。承認を押した時点で投稿されます。
+    - cron: "50 11 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "投稿せず、文面の確認だけ行う"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    name: 投稿内容を準備
+    runs-on: ubuntu-latest
+    outputs:
+      has_post: ${{ steps.gen.outputs.has_post }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 商品を選んで文面を作成
+        id: gen
+        env:
+          RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
+          RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
+          RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
+        run: node src/main.mjs
+
+      - name: 投稿内容を受け渡し
+        if: steps.gen.outputs.has_post == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: post
+          path: out/post.json
+          retention-days: 3
+
+  publish:
+    name: 承認後にThreadsへ投稿
+    needs: prepare
+    if: needs.prepare.outputs.has_post == '1' && github.event.inputs.dry_run != 'true'
+    runs-on: ubuntu-latest
+    # ★この environment に承認者を設定することで、投稿前に人の確認が入ります
+    environment: threads-post
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: post
+          path: out
+
+      - name: Threadsに投稿
+        env:
+          THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+        run: node src/publish.mjs
+
+      - name: 紹介済みリストをコミット
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state/posted.json
+          git diff --staged --quiet || git commit -m "chore: 紹介済み商品を記録"
+          git push

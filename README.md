@@ -1,123 +1,138 @@
 # Threads商品紹介 投稿支援ツール
 
-楽天市場APIで商品を探し、紹介文の下書きを作って、Typefully経由でThreadsの21時の枠に登録します。
+楽天市場の売れ筋ランキングから商品を選び、紹介文を作って Threads に投稿します。
+**投稿前にあなたの承認が入ります。** 承認しなければ投稿されません。
 
-投稿は **`plan_at`（下書きとして枠に置くだけ）** で登録されるため、
-自分がTypefullyで確認して確定するまで投稿されません。
-楽天アフィリエイトは「同じ内容・内容の薄い投稿の繰り返し」をスパムとして禁止しているため、
-全自動ではなくこの半自動構成を既定にしています。
+## 動作の流れ
+
+```
+毎日 20:50 (JST)  GitHub Actions が起動
+                  └ 楽天ランキングから商品を選び、紹介文を生成
+                  └ 承認待ちで停止（スマホに通知が届く）
+
+あなたが内容を確認して Approve を押す
+                  └ Threads API で投稿
+                  └ 紹介済みリストを更新（同じ商品を二度紹介しない）
+```
+
+承認を押さなければ、その日は投稿されません。
+気に入らない文面はそのまま放置すればスキップされます。
 
 ---
 
-## セットアップ手順
+## セットアップ
 
-### 1. 設定を書き換える
+### 1. 楽天ウェブサービス
 
-`src/config.mjs` を開き、次の2つを変更します。
-
-- `githubUser` … あなたのGitHubユーザー名（**必須**）
-- `genres` … 紹介する商品のジャンル（楽天のジャンルID）
-
-### 2. GitHubにリポジトリを作る
-
-リポジトリ名は `rakuten-threads`（`config.mjs` の `repoName` と揃える）。
-**Public** で作成してください（PrivateだとGitHub Pagesが有料プラン扱いになります）。
-
-```bash
-git init
-git add .
-git commit -m "初期セットアップ"
-git branch -M main
-git remote add origin https://github.com/jakkarukato/rakuten-threads.git
-git push -u origin main
-```
-
-### 3. GitHub Pages を有効化する
-
-リポジトリの **Settings → Pages** で
-Source = `Deploy from a branch`、Branch = `main` / `/docs` を選択して保存。
-
-数分後に `https://jakkarukato.github.io/rakuten-threads/` が開けるようになります。
-**このURLが実際に開けることを確認してから、次の楽天への申請に進んでください。**
-
-### 4. 楽天ウェブサービスに申請する
-
-https://webservice.rakuten.co.jp/ から新規申請。記入内容は以下のとおり。
+https://webservice.rakuten.co.jp/ でアプリを申請します。
 
 | 項目 | 記入内容 |
 |---|---|
 | 申請名 | `Threads商品紹介 投稿支援ツール` |
 | アプリケーションURL | `https://jakkarukato.github.io/rakuten-threads/` |
-| 申請タイプ | **Webアプリケーション**（バックエンドサービスは固定IPが必要なのでNG） |
-| 許可されているウェブサイト | `jakkarukato.github.io` ※楽天のドメイン例は消す |
-| APIアクセススコープ | 楽天一葉API（＝楽天市場API）のみ |
+| 申請タイプ | **Webアプリケーション** |
+| 許可されているウェブサイト | `jakkarukato.github.io` |
 | 期待されるQPS | `1` |
+| APIアクセススコープ | 楽天市場API のみ |
 
-説明欄と使用目的は `docs/index.html` の文面をそのまま使えます。
+承認されると **applicationId** と **accessKey** が発行されます。
 
-承認されると **applicationId** と **accessKey** が発行されます（新仕様では両方必須）。
-
-### 5. 楽天アフィリエイトに登録する
+### 2. 楽天アフィリエイト
 
 https://affiliate.rakuten.co.jp/ で楽天会員としてログインし、規約に同意。
-**審査はありません。** アフィリエイトIDを控えておきます。
+**審査はありません。** アフィリエイトIDを控えます。
 
-### 6. Typefully を設定する
+### 3. Meta開発者アカウントとアプリ
 
-1. Threadsアカウントを接続
-2. **Settings → API** でAPIキーを発行
-3. `social_set_id` を調べる：
+1. https://developers.facebook.com/ でアプリを作成
+2. ユースケースに **Threads API** を追加
+3. 権限に `threads_basic` と `threads_content_publish` を追加
+4. **Threads testers** に自分のThreadsアカウントを追加し、
+   Threadsアプリ側の設定から招待を承認する
+
+自分のアカウントに投稿するだけなら、**Metaの審査（App Review）は不要**です。
+
+### 4. 長期トークンとユーザーIDを取得
+
+アプリダッシュボードで短期トークン（1時間有効）を発行したあと、
+以下を実行して長期トークン（60日有効）とユーザーIDを取得します。
+
+`ID.txt` に追記されるだけで、画面には表示されません（ログ流出を防ぐため）。
 
 ```bash
-TYPEFULLY_API_KEY=xxx node src/list-sets.mjs
+APP_SECRET="ここにアプリのシークレット"; SHORT="ここに短期トークン"; LONG=$(curl -s "https://graph.threads.net/access_token?grant_type=th_exchange_token&client_secret=$APP_SECRET&access_token=$SHORT" | grep -o '"access_token":"[^"]*"' | cut -d'"' -f4); UID=$(curl -s "https://graph.threads.net/v1.0/me?fields=id&access_token=$LONG" | grep -o '"id":"[^"]*"' | cut -d'"' -f4); printf '\nTHREADS_ACCESS_TOKEN\n%s\nTHREADS_USER_ID\n%s\n' "$LONG" "$UID" >> ID.txt; echo "ID.txt に追記しました"
 ```
 
-### 7. GitHub Secrets に登録する
+### 5. GitHub Secrets を登録
 
-リポジトリの **Settings → Secrets and variables → Actions** で以下5つを登録。
+**Settings → Secrets and variables → Actions**
 
 | 名前 | 値 |
 |---|---|
-| `RAKUTEN_APP_ID` | 楽天ウェブサービスのapplicationId |
-| `RAKUTEN_ACCESS_KEY` | 楽天ウェブサービスのaccessKey |
-| `RAKUTEN_AFFILIATE_ID` | 楽天アフィリエイトのID |
-| `TYPEFULLY_API_KEY` | TypefullyのAPIキー |
-| `TYPEFULLY_SOCIAL_SET_ID` | 手順6で調べたID |
+| `RAKUTEN_APP_ID` | 楽天のapplicationId |
+| `RAKUTEN_ACCESS_KEY` | 楽天のaccessKey |
+| `RAKUTEN_AFFILIATE_ID` | 楽天アフィリエイトID |
+| `THREADS_USER_ID` | 手順4で取得 |
+| `THREADS_ACCESS_TOKEN` | 手順4で取得 |
+| `GH_PAT` | 手順7で作成 |
+
+### 6. 承認ステップを有効にする（最重要）
+
+**Settings → Environments → New environment**
+
+- 名前は **`threads-post`**（コードと一致させること）
+- **Required reviewers** にチェックを入れ、自分を指定
+- Save
+
+**この設定をしないと、承認なしで投稿されてしまいます。** 必ず設定してください。
+
+### 7. トークン自動更新用のPAT
+
+Threadsの長期トークンは60日で失効し、放置すると復旧に手作業が必要になります。
+月2回、自動で更新するために Personal Access Token を作ります。
+
+1. https://github.com/settings/personal-access-tokens/new
+2. Repository access: このリポジトリのみ
+3. Permissions → Repository permissions → **Secrets: Read and write**
+4. 生成されたトークンを `GH_PAT` という名前でSecretsに登録
 
 ### 8. テスト実行
 
-**Actions** タブ →「毎日の投稿下書き作成」→ **Run workflow**。
-`dry_run` に **チェックを入れたまま**実行すると、Typefullyには登録せず
-生成される文面だけをログで確認できます。
+**Actions → Threadsへの投稿 → Run workflow**
 
-問題なければ `dry_run` のチェックを外して本番実行。
+`dry_run` に**チェックを入れたまま**実行すると、投稿せずに文面だけ確認できます。
+実行結果のサマリーに生成された投稿文が表示されます。
+
+問題なければ `dry_run` のチェックを外して実行。承認待ちで止まるので、
+内容を確認して **Review deployments → Approve** を押すと投稿されます。
 
 ---
 
 ## 運用の注意（守らないとアカウント停止の対象です）
 
+楽天アフィリエイトは違反時、**予告なしの利用停止と成果報酬の返金請求**を規定しています。
+
 - **`#PR` を消さない。** ステマ規制対応。楽天の禁止事項に明記されています
-- **文面テンプレを自分の言葉に書き換える。** 既定のままだと機械的で「内容の薄い投稿」と判定されます
-- **確定前に一言そえる。** plan_at で置かれた下書きに自分のコメントを足してから投稿するのが理想
-- **1日1件を超えない。** 繰り返し投稿はスパム判定されます
+- **文面テンプレを自分の言葉に書き換える。** 既定のままだと「内容の薄い投稿」と判定されます
+- **承認時に一言そえる。** 機械的な投稿の連続がスパム判定の主因です
+- **1日1件を超えない**
 - **複数アカウントで同じ内容を流さない。** 明確に禁止されています
 - ハッシュタグは3個まで（乱用は禁止事項）
 
-## 実行タイミング
+Threadsは楽天アフィリエイトの掲載可能SNSに含まれています
+（Instagram、X、YouTube、楽天ROOM、TikTok、Pinterest、Lemon8、Facebook、Threads、moflog）。
 
-| 何が | いつ |
-|---|---|
-| GitHub Actions が起動 | 毎週 月・木 09:00（日本時間） |
-| Typefully に下書きが置かれる | その日の 21:00 の枠 |
-| 実際に投稿される | あなたがTypefullyで確定したとき |
+---
 
-`src/config.mjs` の `postHour` で投稿時刻を変更できます。
+## 設定の変更
 
-## 全自動にしたい場合
+`src/config.mjs` で変更できます。
 
-`.github/workflows/daily.yml` の `AUTO_PUBLISH` を `"1"` にすると
-`publish_at` で登録され、確認なしで21時に投稿されます。
-規約リスクが上がるため推奨しません。
+- `genres` … 紹介するジャンル（楽天のジャンルID）
+- `filter` … 価格帯、最低レビュー数、最低評価
+- `maxTextLength` … Threadsの上限（500文字）
+
+投稿時刻は `.github/workflows/post.yml` の cron を変更してください（UTC指定）。
 
 ---
 
@@ -125,10 +140,9 @@ TYPEFULLY_API_KEY=xxx node src/list-sets.mjs
 
 実際に叩いて判明した、ドキュメントに書かれていない挙動です。
 
-### 1. 必要なのは Referer ではなく Origin
+### 1. 楽天の新APIで必要なのは Referer ではなく Origin
 
-新APIは `Referer` を送っても
-`403 REQUEST_CONTEXT_BODY_HTTP_REFERRER_MISSING` を返します。
+`Referer` を送っても `403 REQUEST_CONTEXT_BODY_HTTP_REFERRER_MISSING` を返します。
 エラーメッセージは REFERRER と言っていますが、実際に検証されているのは **`Origin`** です。
 
 | 送ったヘッダー | 結果 |
@@ -157,21 +171,16 @@ TYPEFULLY_API_KEY=xxx node src/list-sets.mjs
 
 このため本ツールはキーワード検索ではなく、
 **ジャンルID指定のランキングAPI**を使っています。
-カテゴリが保証され、レビュー数も多い売れ筋商品が安定して取得できます。
 
-### 4. レート制限
+### 4. Threads APIの制約
 
-リクエスト間隔は 1.5秒以上空けること。連続で叩くと 429 になります。
-本ツールは1日1リクエストなので通常は問題になりません。
+- 投稿は2段階（コンテナ作成 → 公開）。間に約30秒の待機が推奨されています
+- 1プロフィールあたり **250投稿 / 24時間**。無料
+- 長期トークンは **60日で失効**。24時間以上経過していれば更新可能
+- **60日を過ぎると永久に失効**し、取得し直しになります
 
-### 5. Typefully無料プランの投稿上限
+### 5. 公開リポジトリではログも公開される
 
-無料プランは **10投稿/月** です（APIとスケジュール機能自体は無料プランに含まれます）。
-毎日投稿すると月30回で上限を超えるため、本ツールは **週2回（月・木）** で動かしています。
-
-| プラン | 料金 | 投稿上限 |
-|---|---|---|
-| Free | $0 | 10投稿/月 |
-| Creator | $99/年 | 1000投稿/月 |
-
-毎日投稿したくなったら Creator にするか、`daily.yml` の cron を変更してください。
+トークンを `console.log` で出すと全世界に見えます。
+`src/refresh-token.mjs` は新しいトークンを一切出力せず、
+標準入力経由で `gh secret set` に渡しています。

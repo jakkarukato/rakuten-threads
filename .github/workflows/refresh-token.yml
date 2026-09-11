@@ -1,0 +1,24 @@
+name: Threadsトークンの更新
+
+# Threadsの長期トークンは60日で失効します。
+# 失効すると復旧に手作業が必要なため、月2回まとめて更新しておきます。
+on:
+  schedule:
+    - cron: "0 3 1,15 * *"
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: トークンを更新してSecretsに書き戻す
+        env:
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: node src/refresh-token.mjs
