@@ -11,7 +11,7 @@ import { readFile, writeFile, mkdir, appendFile } from "node:fs/promises";
 import path from "node:path";
 import { config } from "./config.mjs";
 import { fetchRanking } from "./rakuten.mjs";
-import { buildPostText } from "./templates.mjs";
+import { buildPostText, pickQuestion } from "./templates.mjs";
 
 const HISTORY_PATH = path.join(process.cwd(), "state", "posted.json");
 const OUT_PATH = path.join(process.cwd(), "out", "post.json");
@@ -75,12 +75,20 @@ async function run() {
     return;
   }
 
+  // 締めの質問は、直近20投稿で使ったものを避けて選ぶ
+  const recentQuestions = history
+    .slice(-20)
+    .map((entry) => entry.question)
+    .filter(Boolean);
+  const question = pickQuestion(genre, recentQuestions);
+
   const text = buildPostText({
     item: candidate,
     genre,
     dayIndex: today.dayOfYear,
     // 承認時のコメントを入れる余白を残しておく
     reserve: config.commentReserve,
+    question,
   });
 
   console.log("\n----- 生成された投稿文 -----");
@@ -96,6 +104,7 @@ async function run() {
         itemCode: candidate.itemCode,
         itemName: candidate.itemName,
         genre: genre.name,
+        question,
         generatedAt: new Date().toISOString(),
       },
       null,

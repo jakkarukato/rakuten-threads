@@ -93,6 +93,7 @@ async function run() {
     itemCode: payload.itemCode,
     itemName: payload.itemName,
     genre: payload.genre,
+    question: payload.question,
     postId,
     postedAt: new Date().toISOString(),
   });

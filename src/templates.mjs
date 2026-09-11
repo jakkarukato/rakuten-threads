@@ -348,10 +348,17 @@ const QUESTIONS = [
   "これ、人に勧めるとしたら誰に勧めます？",
 ];
 
-/** 共通の質問とジャンル別の質問を混ぜて、日替わりで1つ選ぶ */
-function pickQuestion(genre, dayIndex) {
+/**
+ * 締めの質問を1つ選ぶ。
+ * 共通の質問とジャンル別の質問を合わせた中から、直近の投稿で使ったものを避けてランダムに選ぶ。
+ * （以前は日付で決めていたため、同じ日は何度実行しても同じ質問になり、
+ *   さらにジャンルの周期と質問数が割り切れて、使われない質問が大半になっていた）
+ */
+export function pickQuestion(genre, recentQuestions = []) {
   const pool = [...QUESTIONS, ...(genre.questions ?? [])];
-  return pool[dayIndex % pool.length];
+  const fresh = pool.filter((q) => !recentQuestions.includes(q));
+  const choices = fresh.length ? fresh : pool;
+  return choices[Math.floor(Math.random() * choices.length)];
 }
 
 /** 事実だけで書ける、数字についての一言 */
@@ -371,7 +378,7 @@ function dataRemark(item) {
  * - 500文字に収まるよう、説明文 → 数字の一言 → スペックの意味 → スペック の順に削る
  * - reserve を指定すると、承認時に人が書く一言のぶん余白を残す
  */
-export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
+export function buildPostText({ item, genre, dayIndex, reserve = 0, question }) {
   const header = "【PR】";
   const url = String(item.affiliateUrl).replace(/\s+/g, "");
   const tags = ["#楽天市場", genre.tag].filter(Boolean).join(" ");
@@ -395,7 +402,7 @@ export function buildPostText({ item, genre, dayIndex, reserve = 0 }) {
   const note = pickSpecNote(allSpecs);
 
   // 締めの質問と、数字についての一言
-  const closer = pickQuestion(genre, dayIndex);
+  const closer = question ?? pickQuestion(genre);
   const remark = dataRemark(item);
 
   // 書き出しの一行。商品説明が使えればそれ、無ければ上位のときだけ順位で始める。
