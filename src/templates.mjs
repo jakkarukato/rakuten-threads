@@ -47,6 +47,25 @@ export function cleanItemName(rawName, limit = 52) {
   return name;
 }
 
+// ノイズキャンセリングの表記ゆれ
+const NC_PATTERN = /ノイズキャンセ|ノイキャン|\bANC\b/i;
+
+// スペックの種類。同じ種類が2つ以上並ばないようにするために使う
+const SPEC_CATEGORIES = [
+  ["nc", NC_PATTERN],
+  ["battery", /時間(再生|駆動|連続)|連続再生|持続時間|バッテリー/],
+  ["water", /防水|防滴|防塵|IPX?\d/i],
+  ["multipoint", /マルチポイント/],
+  ["bluetooth", /Bluetooth|ブルートゥース/i],
+  ["codec", /LDAC|aptX|ハイレゾ/i],
+  ["charge", /急速充電|高速充電|PD|PPS/i],
+];
+
+function categoryOf(spec) {
+  const hit = SPEC_CATEGORIES.find(([, pattern]) => pattern.test(spec));
+  return hit ? hit[0] : null;
+}
+
 /**
  * 商品名からスペックらしき語を取り出す。
  * 材料は【】の中身と、「|」以降（無ければ商品名全体）のスペース区切りのキーワード列。
@@ -81,6 +100,18 @@ export function extractSpecs(rawName, limit = 4) {
   const head = cleanItemName(raw, 22);
 
   const specs = [];
+  const usedCategories = new Set();
+
+  // ★ノイズキャンセリングは購入の決め手になりやすいので、表記が長くても必ず拾って先頭に置く。
+  //   「最大42dBのアクティブノイズキャンセリング」のように書かれていると文字数制限で落ちるため、
+  //   ここだけは表記を「ノイズキャンセリング（最大42dB）」に整えて扱う。
+  const ncToken = candidates.find((c) => NC_PATTERN.test(c));
+  if (ncToken) {
+    const db = ncToken.match(/最大\s*(\d+)\s*dB/i) ?? ncToken.match(/(\d+)\s*dB/i);
+    specs.push(db ? `ノイズキャンセリング（最大${db[1]}dB）` : "ノイズキャンセリング");
+    usedCategories.add("nc");
+  }
+
   for (const c of candidates) {
     const s = c.trim().replace(/[、。]$/, "");
     if (s.length < 4 || s.length > 16) continue;
@@ -90,6 +121,12 @@ export function extractSpecs(rawName, limit = 4) {
     if (NOISE.has(s)) continue;
     if (head.includes(s)) continue;
     if (specs.some((x) => x.includes(s) || s.includes(x))) continue;
+
+    // 同じ種類のスペックは1つだけ（「最大36時間再生」と「長いバッテリー持続時間」など）
+    const category = categoryOf(s);
+    if (category && usedCategories.has(category)) continue;
+    if (category) usedCategories.add(category);
+
     specs.push(s);
     if (specs.length >= limit) break;
   }
