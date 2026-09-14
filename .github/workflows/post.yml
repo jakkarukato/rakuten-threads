@@ -1,9 +1,9 @@
 name: Threadsへの投稿
 
 on:
-  schedule:
+  # schedule:  ← Threadsアカウント停止(2026-09-14)のため一時停止中。再開するときは下の cron と一緒にコメントを外す
     # 毎日 11:50 UTC = 日本時間 20:50。承認を押した時点で投稿されます。
-    - cron: "50 11 * * *"
+    # - cron: "50 11 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
