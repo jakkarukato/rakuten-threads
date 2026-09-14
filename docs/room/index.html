@@ -6,13 +6,293 @@
 <meta name="robots" content="noindex">
 <title>今日の楽天ROOM候補</title>
 <style>
-  :root { color-scheme: light dark; }
-  body { margin: 0 auto; max-width: 40rem; padding: 2rem 1rem; font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif; line-height: 1.7; }
+  :root { color-scheme: light dark; --bg: #f6f5f2; --card: #ffffff; --text: #1d1d1f; --sub: #6b6b70; --line: #e3e1dc; --accent: #bf0000; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #141414; --card: #1f1f1f; --text: #eeeeee; --sub: #a0a0a5; --line: #333333; --accent: #e04545; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif; line-height: 1.6; }
+  main { max-width: 40rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+  h1 { font-size: 1.35rem; margin: 0; }
+  .date { color: var(--sub); margin: .25rem 0 1rem; }
+  .steps { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: .75rem 1rem; margin-bottom: 1.25rem; font-size: .92rem; }
+  .steps ol { margin: .25rem 0; padding-left: 1.25rem; }
+  .steps p { margin: .4rem 0 0; color: var(--sub); font-size: .85rem; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
+  .head { display: flex; gap: .875rem; align-items: flex-start; }
+  .head img { width: 96px; height: 96px; object-fit: contain; border-radius: 8px; background: #ffffff; flex-shrink: 0; }
+  .info { min-width: 0; }
+  .meta { margin: 0; color: var(--sub); font-size: .8rem; }
+  h2 { font-size: 1rem; margin: .15rem 0; overflow-wrap: anywhere; }
+  .price { margin: 0; font-weight: 700; }
+  .price span { font-weight: 400; color: var(--sub); margin-left: .5rem; font-size: .9rem; }
+  textarea { width: 100%; margin-top: .75rem; padding: .6rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; font-size: .88rem; resize: vertical; }
+  .actions { display: flex; gap: .5rem; margin-top: .5rem; }
+  .actions button, .actions a { flex: 1; text-align: center; padding: .7rem .5rem; border-radius: 8px; font: inherit; font-size: .92rem; font-weight: 600; text-decoration: none; cursor: pointer; }
+  .actions button { background: var(--accent); color: #ffffff; border: none; }
+  .actions a { background: transparent; color: var(--text); border: 1px solid var(--line); }
+  footer { color: var(--sub); font-size: .8rem; text-align: center; margin-top: 2rem; }
+  footer a { color: inherit; }
 </style>
 </head>
 <body>
+<main>
   <h1>今日の楽天ROOM候補</h1>
-  <p>まだ候補がありません。毎朝6時ごろに自動で更新されます。</p>
-  <p>すぐに見たい場合は、GitHub の Actions から「楽天ROOMの候補ページを更新」を手動で実行してください。</p>
+  <p class="date">2026年9月15日(火) 更新 · 8件</p>
+
+  <section class="steps">
+    <ol>
+      <li>気になる商品の「紹介文をコピー」を押す</li>
+      <li>「商品ページを開く」から、楽天で「コレ!」を押す</li>
+      <li>コメント欄に貼って投稿する（書きたければ一言足す）</li>
+    </ol>
+    <p>使っていない商品を「使った」と書かないこと。オリジナル写真は自分で撮ったものだけ。</p>
+  </section>
+
+  <article class="card">
+    <div class="head">
+      <img src="https://thumbnail.image.rakuten.co.jp/@0_mall/anker/cabinet/tmb/a1/a1645_normal.jpg?_ex=300x300" alt="" width="96" height="96" loading="lazy">
+      <div class="info">
+        <p class="meta">スマホ・タブレット · ランキング30位</p>
+        <h2>Anker Nano Power Bank / Anker Nano Power Bank iPhone 17/16/…</h2>
+        <p class="price">3,990円<span>★4.5（4029件）</span></p>
+      </div>
+    </div>
+    <textarea id="c0" rows="12" readonly>【PR】
+Anker Nano Power Bank / Anker Nano Power Bank iPhone 17/16/…
+
+・MFi認証済
+・端子一体型
+・Built-In
+・Lightning
+
+3,990円 / ★4.5（レビュー4029件）
+
+#スマホ</textarea>
+    <div class="actions">
+      <button type="button" data-copy="c0">紹介文をコピー</button>
+      <a href="https://hb.afl.rakuten.co.jp/hgc/57627b45.01138f9f.57627b46.a55c6f7c
+/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fanker%2Fa1645%2F&amp;m=http%3A%2F%2Fm.rakuten.co.jp%2Fanker%2Fi%2F10001561%2F&amp;rafcid=wsc_i_ra_a8fa3f18-10f1-4774-8ff0-0bcbd189ce88
+" target="_blank" rel="noopener">商品ページを開く</a>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="head">
+      <img src="https://thumbnail.image.rakuten.co.jp/@0_mall/torraslife/cabinet/13870410/20260911-162959.jpg?_ex=300x300" alt="" width="96" height="96" loading="lazy">
+      <div class="info">
+        <p class="meta">スマホ・タブレット · ランキング29位</p>
+        <h2>TORRAS iPhone18Pro</h2>
+        <p class="price">3,880円<span>★4.5（37件）</span></p>
+      </div>
+    </div>
+    <textarea id="c1" rows="12" readonly>【PR】
+TORRAS iPhone18Pro
+
+・18Promax
+・カメラ保護
+・iPhone 17
+・カメラフィルム
+
+3,880円 / ★4.5（レビュー37件）
+
+#スマホ</textarea>
+    <div class="actions">
+      <button type="button" data-copy="c1">紹介文をコピー</button>
+      <a href="https://hb.afl.rakuten.co.jp/hgc/57627b45.01138f9f.57627b46.a55c6f7c
+/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ftorraslife%2Fts2-camerago%2F&amp;m=http%3A%2F%2Fm.rakuten.co.jp%2Ftorraslife%2Fi%2F10000229%2F&amp;rafcid=wsc_i_ra_a8fa3f18-10f1-4774-8ff0-0bcbd189ce88
+" target="_blank" rel="noopener">商品ページを開く</a>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="head">
+      <img src="https://thumbnail.image.rakuten.co.jp/@0_mall/aosasi-store/cabinet/11664892/11691035/main-1.jpg?_ex=300x300" alt="" width="96" height="96" loading="lazy">
+      <div class="info">
+        <p class="meta">PC・周辺機器 · ランキング30位</p>
+        <h2>ブルーレイドライブ 外付け ポータブル</h2>
+        <p class="price">8,850円<span>★4.1（381件）</span></p>
+      </div>
+    </div>
+    <textarea id="c2" rows="12" readonly>【PR】
+ブルーレイドライブ 外付け ポータブル
+
+・Blu-ray
+・ディスクドライブ
+・USB-A
+・USB-C
+
+8,850円 / ★4.1（レビュー381件）
+
+#PC周辺機器</textarea>
+    <div class="actions">
+      <button type="button" data-copy="c2">紹介文をコピー</button>
+      <a href="https://hb.afl.rakuten.co.jp/hgc/57627b45.01138f9f.57627b46.a55c6f7c
+/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Faosasi-store%2Fapbdg01r13%2F&amp;m=http%3A%2F%2Fm.rakuten.co.jp%2Faosasi-store%2Fi%2F10000038%2F&amp;rafcid=wsc_i_ra_a8fa3f18-10f1-4774-8ff0-0bcbd189ce88
+" target="_blank" rel="noopener">商品ページを開く</a>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="head">
+      <img src="https://thumbnail.image.rakuten.co.jp/@0_mall/irisplaza-r/cabinet/12113165/imgrc0117000731.jpg?_ex=300x300" alt="" width="96" height="96" loading="lazy">
+      <div class="info">
+        <p class="meta">PC・周辺機器 · ランキング29位</p>
+        <h2>シュレッダー 電動シュレッダー 裁断機 家庭用 業務用 オフィス 電動</h2>
+        <p class="price">3,999円<span>★4.3（273件）</span></p>
+      </div>
+    </div>
+    <textarea id="c3" rows="12" readonly>【PR】
+シュレッダー 電動シュレッダー 裁断機 家庭用 業務用 オフィス 電動
+
+・／シュレッダー
+・コンパクト
+・ブラック
+・最大10枚
+
+3,999円 / ★4.3（レビュー273件）
+
+#PC周辺機器</textarea>
+    <div class="actions">
+      <button type="button" data-copy="c3">紹介文をコピー</button>
+      <a href="https://hb.afl.rakuten.co.jp/hgc/57627b45.01138f9f.57627b46.a55c6f7c
+/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Firisplaza-r%2F562091%2F&amp;m=http%3A%2F%2Fm.rakuten.co.jp%2Firisplaza-r%2Fi%2F10092931%2F&amp;rafcid=wsc_i_ra_a8fa3f18-10f1-4774-8ff0-0bcbd189ce88
+" target="_blank" rel="noopener">商品ページを開く</a>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="head">
+      <img src="https://thumbnail.image.rakuten.co.jp/@0_mall/spd-shop/cabinet/07934093/imgrc0112439068.jpg?_ex=300x300" alt="" width="96" height="96" loading="lazy">
+      <div class="info">
+        <p class="meta">オーディオ・カメラ · ランキング28位</p>
+        <h2>マイクロsdカード microSDXC</h2>
+        <p class="price">8,431円<span>★4.6（657件）</span></p>
+      </div>
+    </div>
+    <textarea id="c4" rows="12" readonly>【PR】
+マイクロsdカード microSDXC
+
+・256GB
+・SanDisk
+・サンディスク
+・extreme
+
+8,431円 / ★4.6（レビュー657件）
+
+#ガジェット</textarea>
+    <div class="actions">
+      <button type="button" data-copy="c4">紹介文をコピー</button>
+      <a href="https://hb.afl.rakuten.co.jp/hgc/57627b45.01138f9f.57627b46.a55c6f7c
+/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fspd-shop%2Fsatf256g-qxa1%2F&amp;m=http%3A%2F%2Fm.rakuten.co.jp%2Fspd-shop%2Fi%2F10001992%2F&amp;rafcid=wsc_i_ra_a8fa3f18-10f1-4774-8ff0-0bcbd189ce88
+" target="_blank" rel="noopener">商品ページを開く</a>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="head">
+      <img src="https://thumbnail.image.rakuten.co.jp/@0_mall/trendcapsule/cabinet/imgrc0211129160.jpg?_ex=300x300" alt="" width="96" height="96" loading="lazy">
+      <div class="info">
+        <p class="meta">オーディオ・カメラ · ランキング27位</p>
+        <h2>Fire TV Stick HD 第2世代</h2>
+        <p class="price">5,400円<span>★4.5（74件）</span></p>
+      </div>
+    </div>
+    <textarea id="c5" rows="12" readonly>【PR】
+Fire TV Stick HD 第2世代
+
+・2026年モデル
+・U-NEXTボタン
+・YouTubeボタン
+・Amazon
+
+5,400円 / ★4.5（レビュー74件）
+
+#ガジェット</textarea>
+    <div class="actions">
+      <button type="button" data-copy="c5">紹介文をコピー</button>
+      <a href="https://hb.afl.rakuten.co.jp/hgc/57627b45.01138f9f.57627b46.a55c6f7c
+/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Ftrendcapsule%2F840414695122%2F&amp;m=http%3A%2F%2Fm.rakuten.co.jp%2Ftrendcapsule%2Fi%2F10000080%2F&amp;rafcid=wsc_i_ra_a8fa3f18-10f1-4774-8ff0-0bcbd189ce88
+" target="_blank" rel="noopener">商品ページを開く</a>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="head">
+      <img src="https://thumbnail.image.rakuten.co.jp/@0_mall/e-kit/cabinet/description/ek-kbmr01mcl/ek-kbmr01_1.jpg?_ex=300x300" alt="" width="96" height="96" loading="lazy">
+      <div class="info">
+        <p class="meta">家電 · ランキング30位</p>
+        <h2>冷蔵庫 マット 冷蔵庫マット</h2>
+        <p class="price">3,180円<span>★4.7（16310件）</span></p>
+      </div>
+    </div>
+    <textarea id="c6" rows="12" readonly>【PR】
+冷蔵庫 マット 冷蔵庫マット
+
+・ゼロキーパー
+・高コスパ
+・冷蔵庫下マット
+・ポリカーボネート
+
+3,180円 / ★4.7（レビュー16310件）
+
+#家電</textarea>
+    <div class="actions">
+      <button type="button" data-copy="c6">紹介文をコピー</button>
+      <a href="https://hb.afl.rakuten.co.jp/hgc/57627b45.01138f9f.57627b46.a55c6f7c
+/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fe-kit%2Fek-kbmr01mcl%2F&amp;m=http%3A%2F%2Fm.rakuten.co.jp%2Fe-kit%2Fi%2F10042595%2F&amp;rafcid=wsc_i_ra_a8fa3f18-10f1-4774-8ff0-0bcbd189ce88
+" target="_blank" rel="noopener">商品ページを開く</a>
+    </div>
+  </article>
+
+  <article class="card">
+    <div class="head">
+      <img src="https://thumbnail.image.rakuten.co.jp/@0_mall/beautypark2017/cabinet/kaden/recolte/pot/imgrc0157768450.jpg?_ex=300x300" alt="" width="96" height="96" loading="lazy">
+      <div class="info">
+        <p class="meta">家電 · ランキング29位</p>
+        <h2>recolte レコルト 自動調理ポット ラージ クリームホワイト/ナチュラルブラック</h2>
+        <p class="price">19,800円<span>★4.8（218件）</span></p>
+      </div>
+    </div>
+    <textarea id="c7" rows="12" readonly>【PR】
+recolte レコルト 自動調理ポット ラージ クリームホワイト/ナチュラルブラック
+
+・RSY-3ブレンダー
+・ミキサー
+・フードプロセッサー
+・800ml
+
+19,800円 / ★4.8（レビュー218件）
+
+#家電</textarea>
+    <div class="actions">
+      <button type="button" data-copy="c7">紹介文をコピー</button>
+      <a href="https://hb.afl.rakuten.co.jp/hgc/57627b45.01138f9f.57627b46.a55c6f7c
+/?pc=https%3A%2F%2Fitem.rakuten.co.jp%2Fbeautypark2017%2Frecolte-pot-l%2F&amp;m=http%3A%2F%2Fm.rakuten.co.jp%2Fbeautypark2017%2Fi%2F10005029%2F&amp;rafcid=wsc_i_ra_a8fa3f18-10f1-4774-8ff0-0bcbd189ce88
+" target="_blank" rel="noopener">商品ページを開く</a>
+    </div>
+  </article>
+
+  <footer>
+    <p>毎朝6時ごろに自動で更新されます。このページのリンクはアフィリエイトリンクではありません。</p>
+    <p>Supported by <a href="https://webservice.rakuten.co.jp/">楽天ウェブサービス</a></p>
+  </footer>
+</main>
+<script>
+  document.addEventListener("click", async (event) => {
+    const button = event.target.closest("button[data-copy]");
+    if (!button) return;
+    const area = document.getElementById(button.dataset.copy);
+    try {
+      await navigator.clipboard.writeText(area.value);
+    } catch {
+      area.select();
+      document.execCommand("copy");
+    }
+    const label = button.textContent;
+    button.textContent = "コピーしました";
+    setTimeout(() => { button.textContent = label; }, 1500);
+  });
+</script>
 </body>
 </html>
