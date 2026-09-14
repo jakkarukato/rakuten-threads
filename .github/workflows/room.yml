@@ -1,0 +1,45 @@
+name: 楽天ROOMの候補ページを更新
+
+# 毎朝、楽天ランキングから候補を選んで docs/room/index.html を作り直します。
+# 投稿はしません（楽天ROOMは機械的な投稿を禁止しています）。
+#
+# 毎日コミットが入るので、公開リポジトリの「60日間活動が無いと
+# スケジュール実行が止まる」仕様にも引っかかりません。
+on:
+  schedule:
+    # 毎日 21:00 UTC = 日本時間 6:00
+    - cron: "0 21 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+
+      - name: 候補を選んでページを作る
+        env:
+          RAKUTEN_APP_ID: ${{ secrets.RAKUTEN_APP_ID }}
+          RAKUTEN_ACCESS_KEY: ${{ secrets.RAKUTEN_ACCESS_KEY }}
+          RAKUTEN_AFFILIATE_ID: ${{ secrets.RAKUTEN_AFFILIATE_ID }}
+        run: node src/room.mjs
+
+      - name: ページを公開（コミット）
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/room/index.html state/room-shown.json
+          if git diff --staged --quiet; then
+            echo "変更なし"
+            exit 0
+          fi
+          git commit -m "chore: 楽天ROOMの候補を更新"
+          git pull --rebase
+          git push

@@ -3,30 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Threads商品紹介 投稿支援ツール</title>
+<title>楽天ROOM 候補ページ</title>
 <style>
   :root { color-scheme: light dark; }
-  body {
-    margin: 0 auto; padding: 2.5rem 1.25rem; max-width: 42rem; line-height: 1.9;
-    font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
-  }
+  body { margin: 0 auto; padding: 2.5rem 1.25rem; max-width: 42rem; line-height: 1.9; font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif; }
   h1 { font-size: 1.6rem; line-height: 1.4; margin-bottom: .25rem; }
   h2 { font-size: 1.1rem; margin-top: 2.5rem; padding-bottom: .4rem; border-bottom: 1px solid #8884; }
   .lead { opacity: .75; margin-top: 0; }
   ul { padding-left: 1.2rem; }
   footer { margin-top: 3.5rem; padding-top: 1.25rem; border-top: 1px solid #8884; font-size: .85rem; opacity: .75; }
-  code { background: #8882; padding: .1rem .35rem; border-radius: .25rem; font-size: .9em; }
 </style>
 </head>
 <body>
 
-<h1>Threads商品紹介 投稿支援ツール</h1>
-<p class="lead">楽天市場の商品情報をもとに、SNS投稿の下書きを作成する個人利用のツールです。</p>
+<h1>楽天ROOM 候補ページ</h1>
+<p class="lead">楽天ROOMで紹介する商品を選ぶための、個人用の下書きツールです。</p>
 
 <h2>このツールについて</h2>
 <p>
-楽天ウェブサービスの商品検索APIで取得した商品情報をもとに紹介文の下書きを生成し、
-運営者本人が内容を確認したうえで、自身のThreadsアカウントへ1日1件投稿しています。
+楽天ウェブサービスのランキングAPIで取得した商品情報をもとに、
+レビュー評価などの条件に合う商品を毎朝数件選び、紹介文の下書きとあわせて
+<a href="./room/">候補ページ</a>に表示します。
+</p>
+<p>
+投稿は自動化していません。候補を見て楽天ROOMに投稿するかどうかは、運営者本人が判断し、手作業で行います。
 </p>
 
 <h2>利用しているデータ</h2>
@@ -35,19 +35,10 @@
   <li>価格</li>
   <li>商品画像</li>
   <li>レビュー評価・レビュー件数</li>
-  <li>商品ページURL（アフィリエイトリンク）</li>
+  <li>ランキング順位</li>
+  <li>商品ページURL</li>
 </ul>
-<p>
-取得したデータは投稿の作成と本ページでの表示にのみ使用し、
-第三者への再配布・二次利用は行いません。
-</p>
-
-<h2>広告表記について</h2>
-<p>
-投稿には楽天アフィリエイトのリンクを含みます。
-景品表示法（ステルスマーケティング規制）に基づき、
-すべての投稿の冒頭に <code>【PR】</code> を表示しています。
-</p>
+<p>取得したデータは候補ページの表示にのみ使用し、第三者への再配布・二次利用は行いません。</p>
 
 <h2>運営者への連絡</h2>
 <p>本ツールに関するお問い合わせは、GitHubリポジトリのIssueよりお願いします。</p>
