@@ -17,7 +17,7 @@ import { SHARED_QUESTIONS, GENRE_QUESTIONS } from "./questions.mjs";
 
 // 販促文言。スペックとして扱いたくないもの
 const PROMO =
-  /(セール|SALE|クーポン|OFF|オフ|ポイント|倍|送料|期間限定|限定|まで|円|%|％|マラソン|訳あり|あす楽|即納|在庫|レビュー|ランキング|1位|１位|プレゼント|ギフト|新生活|father|mother)/i;
+  /(セール|SALE|クーポン|OFF|オフ|ポイント|倍|送料|期間限定|限定|まで|円|%|％|マラソン|訳あり|あす楽|即納|在庫|レビュー|ランキング|1位|１位|プレゼント|ギフト|新生活|楽天で一番|高評価|正規品|新品|特典|保険|保証付|father|mother)/i;
 
 // 商品カテゴリそのものを指すような、情報量のない語
 const NOISE = new Set([
@@ -122,7 +122,7 @@ export function extractSpecs(rawName, limit = 4) {
   }
 
   for (const c of candidates) {
-    const s = c.trim().replace(/^[\p{P}\p{S}]+/u, "").replace(/[、。]$/, "");
+    const s = c.trim().replace(/[「」『』★☆]/g, "").replace(/^[\p{P}\p{S}]+/u, "").replace(/[)）\]］」』>＞、。]+$/u, "");
     if (s.length < 4 || s.length > 16) continue;
     // 「11 01:59」のような数字と記号だけの断片を弾く
     if ((s.match(/\p{L}/gu) ?? []).length < 2) continue;
