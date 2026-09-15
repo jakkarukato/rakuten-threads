@@ -53,6 +53,9 @@ export function cleanItemName(rawName, limit = 52) {
   return name;
 }
 
+// 英語だけのスペックでも残す、よく使われる規格名
+const KEEP_ENGLISH = /^(USB-?[AC]|Type-?C|Lightning|MagSafe|Qi2?|GaN|PPS|ANC|ENC|LDAC|aptX.*|AAC|Wi-?Fi.*|HDMI|SSD|HDD|NVMe|microSD.*|SDXC|SDHC|Blu-?ray|MFi|OLED|LED)$/i;
+
 // ノイズキャンセリングの表記ゆれ
 const NC_PATTERN = /ノイズキャンセ|ノイキャン|\bANC\b/i;
 
@@ -123,6 +126,8 @@ export function extractSpecs(rawName, limit = 4) {
     if (s.length < 4 || s.length > 16) continue;
     // 「11 01:59」のような数字と記号だけの断片を弾く
     if ((s.match(/\p{L}/gu) ?? []).length < 2) continue;
+    // 英語だけの断片（Built-In, Connector など）は外す。規格名や数字の入ったものは残す
+    if (/^[A-Za-z][A-Za-z\s\-]*$/.test(s) && !KEEP_ENGLISH.test(s)) continue;
     if (PROMO.test(s)) continue;
     if (NOISE.has(s)) continue;
     if (head.includes(s)) continue;
