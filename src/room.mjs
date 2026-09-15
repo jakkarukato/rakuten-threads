@@ -120,10 +120,29 @@ async function loadShown() {
   }
 }
 
+/**
+ * 商品ページのURL（ふつうの商品ページ）。
+ * affiliateId を付けてランキングAPIを呼ぶと itemUrl もアフィリエイトリンクで返り、
+ * しかも途中に改行が混ざってリンクが切れることがある。自分で開くためのリンクなので、
+ * アフィリエイトリンクの pc パラメータから、元の商品ページのURLを取り出して使う。
+ */
+function plainItemUrl(item) {
+  const raw = String(item.itemUrl ?? "").replace(/\s+/g, "");
+  try {
+    const url = new URL(raw);
+    if (url.hostname === "hb.afl.rakuten.co.jp") {
+      return safeUrl(url.searchParams.get("pc") ?? "");
+    }
+    return safeUrl(url.href);
+  } catch {
+    return "";
+  }
+}
+
 // ---------- ページ ----------
 function renderCard({ genre, item, name, comment }, index) {
   const image = imageUrlOf(item);
-  const link = safeUrl(item.itemUrl);
+  const link = plainItemUrl(item);
   const rows = Math.min(14, comment.split("\n").length + 1);
   const rank = Number(item.rank) ? ` · ランキング${Number(item.rank)}位` : "";
 

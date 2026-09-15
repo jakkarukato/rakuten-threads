@@ -114,7 +114,7 @@ export function extractSpecs(rawName, limit = 4) {
   }
 
   for (const c of candidates) {
-    const s = c.trim().replace(/[、。]$/, "");
+    const s = c.trim().replace(/^[\p{P}\p{S}]+/u, "").replace(/[、。]$/, "");
     if (s.length < 4 || s.length > 16) continue;
     // 「11 01:59」のような数字と記号だけの断片を弾く
     if ((s.match(/\p{L}/gu) ?? []).length < 2) continue;
