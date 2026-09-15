@@ -25,7 +25,7 @@ export const COMMENT = {
   // 各見出しに載せる最大数
   specLimit: 5,
   whoLimit: 4,
-  checkLimit: 5,
+  checkLimit: 6,
 };
 
 // ------------------------------------------------------------
