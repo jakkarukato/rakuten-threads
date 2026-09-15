@@ -114,6 +114,7 @@ function renderCard({ genre, item, name, comment }, index) {
       </div>
     </div>
     <textarea id="c${index}" rows="${rows}" readonly>${escapeHtml(comment)}</textarea>
+    <label class="pr-toggle"><input type="checkbox" data-pr="c${index}"> 無料提供・イベント参加・お試しクーポン利用の商品（【PR】を付ける）</label>
     <div class="actions">
       <button type="button" data-copy="c${index}">紹介文をコピー</button>
       ${link ? `<a href="${escapeHtml(link)}" target="_blank" rel="noopener">商品ページを開く</a>` : ""}
@@ -153,6 +154,7 @@ function renderPage(picks, generatedAt) {
   .price { margin: 0; font-weight: 700; }
   .price span { font-weight: 400; color: var(--sub); margin-left: .5rem; font-size: .9rem; }
   textarea { width: 100%; margin-top: .75rem; padding: .6rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; font-size: .88rem; resize: vertical; }
+  .pr-toggle { display: flex; gap: .4rem; align-items: center; margin-top: .5rem; font-size: .85rem; color: var(--sub); }
   .actions { display: flex; gap: .5rem; margin-top: .5rem; }
   .actions button, .actions a { flex: 1; text-align: center; padding: .7rem .5rem; border-radius: 8px; font: inherit; font-size: .92rem; font-weight: 600; text-decoration: none; cursor: pointer; }
   .actions button { background: var(--accent); color: #ffffff; border: none; }
@@ -195,6 +197,15 @@ ${cards}
     const label = button.textContent;
     button.textContent = "コピーしました";
     setTimeout(() => { button.textContent = label; }, 1500);
+  });
+  // 無料提供などの商品は【PR】が必須。チェックを入れたら紹介文の先頭に付け、外したら消す
+  document.addEventListener("change", (event) => {
+    const box = event.target.closest("input[data-pr]");
+    if (!box) return;
+    const area = document.getElementById(box.dataset.pr);
+    const mark = "【PR】\n";
+    const body = area.value.startsWith(mark) ? area.value.slice(mark.length) : area.value;
+    area.value = box.checked ? mark + body : body;
   });
 </script>
 </body>
