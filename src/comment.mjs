@@ -22,30 +22,50 @@ export const COMMENT = {
   // 範囲内の候補が複数あるときは、この文字数に近いものを選ぶ
   target: 460,
 
-  // 「注目ポイント」に載せるスペックの最大数
+  // 各見出しに載せる最大数
   specLimit: 5,
+  whoLimit: 4,
+  checkLimit: 5,
 };
 
 // ------------------------------------------------------------
 //  商品の種類・機能ごとの「向いている人」と「購入前に確かめたいこと」
-//  上から順に調べる。商品の種類を先に、どの商品にも付きやすい語（コンパクト等）を最後に。
+//  当てはまるものは全部使う。書き出しの一文には、最初に当てはまったものを使う。
+//  商品の種類を先に、どの商品にも付きやすい語（コンパクト等）を最後に並べる。
 //  ★どちらも事実や一般的な注意だけ。使ってみた感想は書かない。
 // ------------------------------------------------------------
 const TOPICS = [
-  // --- 商品の種類 ---
+  // --- 商品の種類：家電 ---
+  { pattern: /ヘアアイロン|カールアイロン|ストレートアイロン|コテ/, who: "髪のセットの時間を短くしたい人", check: "プレートの幅（mm）と、設定できる温度の範囲。" },
+  { pattern: /ドライヤー/, who: "髪を乾かす時間を短くしたい人", check: "風量と本体の重さ、コードの長さ。" },
+  { pattern: /除湿機|衣類乾燥/, who: "部屋干しの洗濯物を早く乾かしたい人", check: "1日あたりの除湿量（L）と、タンクの容量。" },
+  { pattern: /豆乳メーカー|ミキサー|ブレンダー|スープメーカー/, who: "手作りの飲み物やスープを手軽に作りたい人", check: "一度に作れる量と、使ったあとに洗う部品の数。" },
   { pattern: /シュレッダー/, who: "家で書類をまとめて処分したい人", check: "一度に裁断できる枚数と、ホチキスの針やカードに対応しているか。" },
   { pattern: /自動調理|電気圧力鍋/, who: "料理の手間を減らしたい人", check: "容量によって一度に作れる量が変わるので、家族の人数に合うか。" },
   { pattern: /ロボット掃除機/, who: "掃除の時間を減らしたい人", check: "越えられる段差の高さと、充電台を置く場所があるか。" },
   { pattern: /冷蔵庫\s*マット|キズ防止|傷防止|床保護/, who: "床の傷やへこみが気になる人", check: "冷蔵庫の幅と奥行きに合うサイズか。置く前に測っておくと失敗しにくい。" },
-  { pattern: /Fire TV|ストリーミング|Chromecast/i, who: "テレビで動画配信を見たい人", check: "テレビのHDMI端子に空きがあるか。" },
+
+  // --- 商品の種類：PC・周辺機器 ---
+  { pattern: /デスクトップ\s*パソコン|ノート\s*パソコン|ノートPC|デスクトップPC/i, who: "新しくパソコンを用意したい人", check: "CPU・メモリ・ストレージの数値と、使いたいソフトの動作条件。" },
+  { pattern: /プリンター|複合機/, who: "家で書類や写真を印刷したい人", check: "インクの種類と、スマホから印刷できるか。" },
   { pattern: /ブルーレイ|Blu-?ray|DVDドライブ|光学ドライブ/i, who: "ドライブのないPCでディスクを使いたい人", check: "再生用のソフトが付属しているか。PCの接続端子（USB-A / USB-C）に合うか。" },
-  { pattern: /microSD|SDカード|SSD|USBメモリ|外付けHDD/i, who: "写真や動画をたくさん保存したい人", check: "使う機器が対応している最大容量と規格。" },
+  { pattern: /microSD|SDカード|SSD|USBメモリ|外付けHDD|ハードディスク|HDD/i, who: "写真や動画をたくさん保存したい人", check: "使う機器が対応している容量と規格。" },
+
+  // --- 商品の種類：オーディオ・映像 ---
+  { pattern: /Fire TV|ストリーミング|Chromecast/i, who: "テレビで動画配信を見たい人", check: "テレビのHDMI端子に空きがあるか。" },
+  { pattern: /テレビ保護パネル|液晶保護パネル/, who: "テレビの画面を傷や衝撃から守りたい人", check: "テレビのインチ数と、取り付け方法。" },
+  { pattern: /骨伝導|オープンイヤー|イヤーカフ|耳を塞がない|耳をふさがない/, who: "耳をふさがずに音を聞きたい人", check: "音量を上げると音漏れしやすいので、使う場所に合うか。" },
+  { pattern: /イヤホン|ヘッドホン|ヘッドフォン/, who: "通勤や家事の合間に音楽を聴きたい人", check: "連続再生時間と、ケースを含めた合計の再生時間。" },
+
+  // --- 商品の種類：スマホまわり ---
   { pattern: /カメラ保護|カメラフィルム|レンズ保護/, who: "スマホのカメラの傷が気になる人", check: "対応機種の型番。似た名前の機種と間違えやすい。" },
   { pattern: /保護フィルム|ガラスフィルム/, who: "画面の傷や割れが心配な人", check: "対応機種の型番と、ケースと干渉しないか。" },
-  { pattern: /骨伝導|オープンイヤー|耳を塞がない|耳をふさがない/, who: "耳をふさぐのが苦手な人", check: "音量を上げると音漏れしやすいので、使う場所に合うか。" },
+  { pattern: /(iPhone|スマホ|Galaxy|Pixel|Android).{0,20}ケース|ケース.{0,10}(iPhone|スマホ)/i, who: "スマホを落としたときの傷や割れが心配な人", check: "対応機種と、カメラ部分やボタンの位置が合うか。" },
 
   // --- 機能 ---
   { pattern: /端子一体|ケーブル内蔵|ケーブル一体|直挿し/, who: "ケーブルを持ち歩くのが面倒な人", check: "本体の端子（USB-C / Lightning）が自分のスマホに合うか。" },
+  { pattern: /(type-?c|USB|Lightning).{0,12}ケーブル|充電ケーブル/i, who: "充電やデータ転送のケーブルを買い替えたい人", check: "両端の端子の組み合わせと長さ、対応する充電の出力（W数）。" },
+  { pattern: /MagSafe|マグセーフ/i, who: "マグネットで充電器やアクセサリーを付けたい人", check: "MagSafe対応の充電器やアクセサリーと組み合わせて使えるか。" },
   { pattern: /ノイズキャンセリング|ノイキャン|\bANC\b/i, who: "電車や人の多い場所で音楽を聴く人", check: "ノイズキャンセリングの効き方は環境で変わるので、レビューの声もあわせて。" },
   { pattern: /マルチポイント/, who: "スマホとPCを行き来しながら使う人", check: "同時に接続できる台数と、対応している機器。" },
   { pattern: /外音取り込み|ヒアスルー|アンビエント/, who: "つけたまま周りの音も聞きたい人", check: "外音取り込みの切り替え方法（ボタンかアプリか）。" },
@@ -60,12 +80,12 @@ const TOPICS = [
   { pattern: /Nano|ミニ|超小型|コンパクト|軽量/i, who: "荷物を少しでも軽くしたい人", check: "サイズと重さの数値。" },
 ];
 
-// どのジャンルでも当てはまる「向いている人」（キーは config.mjs の genres[].id）
+// ジャンル全体に当てはまる「向いている人」（キーは config.mjs の genres[].id）
 const GENRE_AUDIENCE = {
   564500: ["スマホを長く快適に使いたい人", "スマホまわりの小物を見直したい人"],
   100026: ["作業環境を整えたい人", "在宅での作業が多い人"],
   211742: ["音や映像まわりを充実させたい人", "家での楽しみを増やしたい人"],
-  562637: ["暮らしを少し便利にしたい人", "家事の手間を減らしたい人"],
+  562637: ["暮らしを少し便利にしたい人", "毎日の手間を少し減らしたい人"],
 };
 
 // どの商品にも当てはまる「購入前にチェック」
@@ -74,6 +94,9 @@ const GENERIC_CHECKS = [
   "高評価だけでなく、低評価のレビューに書かれている内容。",
   "色やサイズ違いがある場合、選び間違いがないか。",
   "配送日とポイント倍率。ショップによって違う。",
+  "保証期間と、困ったときの問い合わせ先。",
+  "付属品（ケーブルや説明書など）に何が含まれているか。",
+  "返品や交換の条件。ショップによって違う。",
 ];
 
 // 書き出しの一文。「〇〇そう。」は使わない
@@ -82,6 +105,19 @@ const LEAD_TEMPLATES = [
   (who) => `${who}なら、チェックしておきたい一品。`,
   (who) => `${who}の選択肢に入れておきたいアイテム。`,
   (who) => `${who}に向けたアイテム。`,
+];
+
+// 選んだ基準の一文（config.filter の実際の条件から作る）
+const SELECTION_TEMPLATES = [
+  (genre, f) => `${genre.name}の売れ筋ランキングから、レビュー★${f.avg}以上・${f.count}件以上の商品を選んでいます。`,
+  (genre, f) => `レビュー★${f.avg}以上、${f.count}件以上の商品だけを、${genre.name}の売れ筋から選んでいます。`,
+];
+
+// 締めの一文
+const CLOSING_TEMPLATES = [
+  "詳しい仕様やサイズは、商品ページで確認してみてください。",
+  "気になったら、商品ページでレビューの中身もあわせて見てみてください。",
+  "購入前に、商品ページで最新の価格と在庫をチェックしてみてください。",
 ];
 
 // ---------- 小道具 ----------
@@ -102,9 +138,15 @@ const rotate = (list, n) => {
   return [...list.slice(k), ...list.slice(0, k)];
 };
 
-/** 商品名。名前の中にスペックが出てきたら、そこで切る（スペック欄と二重になるため） */
+/**
+ * 商品名。
+ * ・「A / A iPhone 17/16…」のように「 / 」で同じ名前を繰り返している場合は最初の部分だけにする
+ * ・名前の中にスペックが出てきたら、そこで切る（スペック欄と二重になるため）
+ */
 export function displayName(rawName, specs) {
   let name = cleanItemName(rawName, 200);
+  const first = name.split(/\s+\/\s+/)[0];
+  if (first.length >= 8) name = first;
   const cut = specs
     .map((spec) => name.indexOf(spec))
     .filter((i) => i > 6)
@@ -161,6 +203,12 @@ export function buildComment(item, genre) {
   const rankText =
     rank >= 1 && rank <= config.rankThreshold ? `${genre.name}のランキングでは${rank}位。` : "";
   const numbers = `${reviewSentence(item, seed >>> 3)}${rankText}`;
+  const filter = {
+    avg: Number(config.filter.minReviewAverage).toFixed(1),
+    count: Number(config.filter.minReviewCount),
+  };
+  const selection = SELECTION_TEMPLATES[(seed >>> 5) % SELECTION_TEMPLATES.length](genre, filter);
+  const closing = CLOSING_TEMPLATES[(seed >>> 7) % CLOSING_TEMPLATES.length];
 
   // 専門用語の言い換えは、最初に該当した1つだけ添える
   let noted = false;
@@ -175,15 +223,17 @@ export function buildComment(item, genre) {
   const stars = Number(item.reviewAverage).toFixed(1);
   const count = Number(item.reviewCount).toLocaleString("ja-JP");
 
-  const compose = (specN, whoN, checkN) => {
+  const compose = (p) => {
     const lines = [];
     if (COMMENT.prLabel) lines.push(COMMENT.prLabel);
     if (lead) lines.push(lead);
     lines.push(numbers);
+    if (p.selection) lines.push(selection);
     lines.push("", `■${name}`, `${yen(item.itemPrice)} / ★${stars}（レビュー${count}件）`);
-    if (specN > 0) lines.push("", "■注目ポイント", ...bullets.slice(0, specN).map((b) => `・${b}`));
-    if (whoN > 0) lines.push("", "■こんな人に", ...otherWho.slice(0, whoN).map((w) => `・${w}`));
-    if (checkN > 0) lines.push("", "■購入前にチェック", ...checks.slice(0, checkN).map((c) => `・${c}`));
+    if (p.s > 0) lines.push("", "■注目ポイント", ...bullets.slice(0, p.s).map((b) => `・${b}`));
+    if (p.w > 0) lines.push("", "■こんな人に", ...otherWho.slice(0, p.w).map((w) => `・${w}`));
+    if (p.c > 0) lines.push("", "■購入前にチェック", ...checks.slice(0, p.c).map((c) => `・${c}`));
+    if (p.closing) lines.push("", closing);
     if (genre.tag) lines.push("", genre.tag);
     return lines.join("\n");
   };
@@ -191,22 +241,30 @@ export function buildComment(item, genre) {
   // 載せる項目の数を変えた候補を全部作り、400〜500文字に収まるものを選ぶ
   const plans = [];
   for (let s = bullets.length; s >= 0; s--) {
-    for (let w = Math.min(3, otherWho.length); w >= 0; w--) {
-      for (let c = Math.min(3, checks.length); c >= 0; c--) {
-        plans.push({ s, text: compose(s, w, c) });
+    for (let w = Math.min(COMMENT.whoLimit, otherWho.length); w >= 0; w--) {
+      for (let c = Math.min(COMMENT.checkLimit, checks.length); c >= 0; c--) {
+        for (const selectionOn of [true, false]) {
+          for (const closingOn of [true, false]) {
+            const p = { s, w, c, selection: selectionOn, closing: closingOn };
+            p.text = compose(p);
+            plans.push(p);
+          }
+        }
       }
     }
   }
 
+  const extras = (p) => Number(p.selection) + Number(p.closing);
   const inRange = plans.filter(
     (p) => p.text.length >= COMMENT.minLength && p.text.length <= COMMENT.maxLength
   );
   let chosen;
   if (inRange.length) {
-    // スペックを多く載せられるものを優先し、その中で目標の文字数に近いもの
+    // スペックを多く、選んだ基準と締めの一文も入れ、その中で目標の文字数に近いもの
     chosen = inRange.sort(
       (a, b) =>
         b.s - a.s ||
+        extras(b) - extras(a) ||
         Math.abs(a.text.length - COMMENT.target) - Math.abs(b.text.length - COMMENT.target)
     )[0];
   } else {
