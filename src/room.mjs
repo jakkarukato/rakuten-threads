@@ -101,6 +101,11 @@ function buildComment(item, genre) {
 
   const lines = [];
   if (ROOM.prLabel) lines.push(ROOM.prLabel);
+  const audience = audienceLine(item, specs);
+  const review = reviewLine(item, genre);
+  if (audience) lines.push(audience);
+  if (review) lines.push(review);
+  if (audience || review) lines.push("");
   lines.push(name, "");
   if (bullets.length) lines.push(...bullets, "");
   lines.push(
@@ -109,6 +114,74 @@ function buildComment(item, genre) {
   if (genre.tag) lines.push("", genre.tag);
 
   return { name, text: lines.join("\n") };
+}
+
+// ---------- 感想っぽい一言（事実から言えることだけ） ----------
+// ★「使ってみて〜」「気になってる」のような書き手の体験や気持ちは書かない。
+//   商品名とスペックから言える「向いていそうな人」と、レビューの数字への反応だけを入れる。
+//   上から順に調べて、最初に当てはまったものを使う。
+const AUDIENCE_RULES = [
+  [/端子一体|ケーブル内蔵|ケーブル一体|直挿し/, "ケーブルを持ち歩くのが面倒な人"],
+  [/ノイズキャンセリング|ノイキャン|\bANC\b/i, "電車や人の多い場所で音楽を聴く人"],
+  [/骨伝導|オープンイヤー|耳を塞がない|耳をふさがない/, "耳をふさぐのが苦手な人"],
+  [/マルチポイント/, "スマホとPCを行き来しながら使う人"],
+  [/外音取り込み|ヒアスルー|アンビエント/, "つけたまま周りの音も聞きたい人"],
+  [/低遅延|ゲーミング|ゲームモード/, "動画やゲームで音のズレが気になる人"],
+  [/IPX?\d|防水|防滴/i, "運動中や雨の日にも使いたい人"],
+  [/GaN|窒化ガリウム/i, "充電器を小さく軽くしたい人"],
+  [/急速充電|高速充電|PD対応|PPS/i, "充電を待つ時間を短くしたい人"],
+  [/(1\d|[2-9]\d)\d{3}\s*mAh|大容量/i, "外出が長い日や旅行に持っていきたい人"],
+  [/Nano|ミニ|超小型|コンパクト|軽量/i, "荷物を少しでも軽くしたい人"],
+  [/microSD|SDカード|SSD|USBメモリ|外付けHDD/i, "写真や動画をたくさん保存したい人"],
+  [/ブルーレイ|Blu-?ray|DVDドライブ|光学ドライブ/i, "ドライブのないPCでディスクを使いたい人"],
+  [/カメラ保護|カメラフィルム|レンズ保護/, "スマホのカメラの傷が気になる人"],
+  [/保護フィルム|ガラスフィルム/, "画面の傷や割れが心配な人"],
+  [/Fire TV|ストリーミング|Chromecast/i, "テレビで動画配信を見たい人"],
+  [/シュレッダー/, "家で書類をまとめて処分したい人"],
+  [/自動調理|電気圧力鍋/, "料理の手間を減らしたい人"],
+  [/冷蔵庫\s*マット|キズ防止|傷防止|床保護/, "床の傷やへこみが気になる人"],
+  [/ロボット掃除機/, "掃除の時間を減らしたい人"],
+  [/静音/, "動作音が気になる場所で使いたい人"],
+];
+const AUDIENCE_ENDINGS = ["に良さそう。", "にはちょうどいいかも。", "に向いていそう。"];
+
+/** 商品ごとに決まった数を返す（同じ商品なら毎回同じ言い回しになり、商品が変われば変わる） */
+function hashOf(text) {
+  let h = 0;
+  for (const ch of String(text)) h = (h * 31 + ch.codePointAt(0)) >>> 0;
+  return h;
+}
+
+/** A: 向いていそうな人 */
+function audienceLine(item, specs) {
+  const haystack = `${item.itemName} ${specs.join(" ")}`;
+  const hit = AUDIENCE_RULES.find(([pattern]) => pattern.test(haystack));
+  if (!hit) return "";
+  return hit[1] + AUDIENCE_ENDINGS[hashOf(item.itemCode) % AUDIENCE_ENDINGS.length];
+}
+
+/** B: レビューの数字への反応 */
+function reviewLine(item, genre) {
+  const count = Number(item.reviewCount);
+  const average = Number(item.reviewAverage);
+  const stars = average.toFixed(1);
+  const rank = Number(item.rank);
+  const variant = hashOf(`${item.itemCode}:review`) % 2;
+  if (count >= 1000 && average >= 4.4) {
+    const rounded = `${(Math.floor(count / 1000) * 1000).toLocaleString("ja-JP")}件以上`;
+    return variant === 0
+      ? `レビュー${rounded}で★${stars}。これだけ数があると、選ぶときの安心感がちがう。`
+      : `レビュー${rounded}で★${stars}。数も評価もそろっているのは強い。`;
+  }
+  if (count >= 300 && average >= 4.3) {
+    const shown = count.toLocaleString("ja-JP");
+    return variant === 0
+      ? `レビュー${shown}件で★${stars}。評価が安定していて参考にしやすい。`
+      : `レビュー${shown}件で★${stars}。買った人の満足度が高めなのが分かる。`;
+  }
+  if (average >= 4.6) return `★${stars}はかなり高め。`;
+  if (rank >= 1 && rank <= 10) return `${genre.name}のランキングで${rank}位。いま売れているのが分かる。`;
+  return "";
 }
 
 async function loadShown() {
