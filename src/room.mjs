@@ -203,7 +203,7 @@ ${cards}
     const box = event.target.closest("input[data-pr]");
     if (!box) return;
     const area = document.getElementById(box.dataset.pr);
-    const mark = "【PR】\n";
+    const mark = "【PR】" + String.fromCharCode(10);
     const body = area.value.startsWith(mark) ? area.value.slice(mark.length) : area.value;
     area.value = box.checked ? mark + body : body;
   });
