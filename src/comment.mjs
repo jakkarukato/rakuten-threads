@@ -13,8 +13,8 @@ import { cleanItemName, extractSpecs, pickSpecNote } from "./templates.mjs";
 
 export const COMMENT = {
   // 先頭の広告表記。楽天アフィリエイトの公式ガイドラインでは通常のアフィリエイト投稿は任意だが、
-  // 付ける場合は上部に置くのが適切とされている。不要なら "" にする。
-  prLabel: "【PR】",
+  // 付ける場合は上部に置くのが適切とされている。ユーザーの希望で既定は付けない（"【PR】" にすると付く）。
+  prLabel: "",
 
   // 紹介文全体の文字数（商品情報も含む）
   minLength: 400,
