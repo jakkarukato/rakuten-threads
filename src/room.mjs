@@ -16,7 +16,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { config } from "./config.mjs";
 import { fetchRanking, sleep } from "./rakuten.mjs";
-import { cleanItemName, extractSpecs, pickSpecNote } from "./templates.mjs";
+import { buildComment } from "./comment.mjs";
 
 // ---------- 設定 ----------
 const ROOM = {
@@ -26,10 +26,7 @@ const ROOM = {
   // 一度候補に出した商品を、何日間は出さないか
   skipDays: 60,
 
-  // 紹介文の先頭に付ける広告表記。
-  // 楽天アフィリエイトの公式ガイドラインでは、通常のアフィリエイト投稿のPR表記は任意だが、
-  // 付ける場合は投稿の上部に置くのが適切とされている。不要なら "" にする。
-  prLabel: "【PR】",
+  // 紹介文の中身（文字数、PR表記など）の設定は src/comment.mjs の COMMENT にある。
 };
 
 const SHOWN_PATH = path.join(process.cwd(), "state", "room-shown.json");
@@ -71,124 +68,6 @@ function imageUrlOf(item) {
   return safeUrl(url ? url.replace(/_ex=\d+x\d+/, "_ex=300x300") : "");
 }
 
-/** 商品名。名前の中にスペックが出てきたら、そこで切る（箇条書きと二重になるため） */
-function displayName(rawName, specs) {
-  let name = cleanItemName(rawName, 200);
-  const cut = specs
-    .map((spec) => name.indexOf(spec))
-    .filter((i) => i > 6)
-    .sort((a, b) => a - b)[0];
-  if (cut !== undefined) name = name.slice(0, cut).trim();
-  return name.length > 60 ? name.slice(0, 59) + "…" : name;
-}
-
-/**
- * 紹介文の下書き。事実だけで作る。
- * 使用感（「使ってみて〜」）は書かない。持っていない商品について書けば嘘になるため。
- */
-function buildComment(item, genre) {
-  const specs = extractSpecs(item.itemName);
-  const name = displayName(item.itemName, specs);
-
-  // 専門用語の言い換えは、最初に該当した1つだけ添える
-  let noted = false;
-  const bullets = specs.map((spec) => {
-    const note = noted ? "" : pickSpecNote([spec]);
-    if (!note) return `・${spec}`;
-    noted = true;
-    return `・${spec}（${note}）`;
-  });
-
-  const lines = [];
-  if (ROOM.prLabel) lines.push(ROOM.prLabel);
-  const audience = audienceLine(item, specs);
-  const review = reviewLine(item, genre);
-  if (audience) lines.push(audience);
-  if (review) lines.push(review);
-  if (audience || review) lines.push("");
-  lines.push(name, "");
-  if (bullets.length) lines.push(...bullets, "");
-  lines.push(
-    `${yen(item.itemPrice)} / ★${Number(item.reviewAverage).toFixed(1)}（レビュー${Number(item.reviewCount)}件）`
-  );
-  if (genre.tag) lines.push("", genre.tag);
-
-  return { name, text: lines.join("\n") };
-}
-
-// ---------- 感想っぽい一言（事実から言えることだけ） ----------
-// ★「使ってみて〜」「気になってる」のような書き手の体験や気持ちは書かない。
-//   商品名とスペックから言える「向いていそうな人」と、レビューの数字への反応だけを入れる。
-//   上から順に調べて、最初に当てはまったものを使う。
-const AUDIENCE_RULES = [
-  // --- 商品の種類（先に調べる。種類が分かれば、機能の語より正確） ---
-  [/シュレッダー/, "家で書類をまとめて処分したい人"],
-  [/自動調理|電気圧力鍋/, "料理の手間を減らしたい人"],
-  [/ロボット掃除機/, "掃除の時間を減らしたい人"],
-  [/冷蔵庫\s*マット|キズ防止|傷防止|床保護/, "床の傷やへこみが気になる人"],
-  [/Fire TV|ストリーミング|Chromecast/i, "テレビで動画配信を見たい人"],
-  [/ブルーレイ|Blu-?ray|DVDドライブ|光学ドライブ/i, "ドライブのないPCでディスクを使いたい人"],
-  [/microSD|SDカード|SSD|USBメモリ|外付けHDD/i, "写真や動画をたくさん保存したい人"],
-  [/カメラ保護|カメラフィルム|レンズ保護/, "スマホのカメラの傷が気になる人"],
-  [/保護フィルム|ガラスフィルム/, "画面の傷や割れが心配な人"],
-  [/骨伝導|オープンイヤー|耳を塞がない|耳をふさがない/, "耳をふさぐのが苦手な人"],
-
-  // --- 機能 ---
-  [/端子一体|ケーブル内蔵|ケーブル一体|直挿し/, "ケーブルを持ち歩くのが面倒な人"],
-  [/ノイズキャンセリング|ノイキャン|\bANC\b/i, "電車や人の多い場所で音楽を聴く人"],
-  [/マルチポイント/, "スマホとPCを行き来しながら使う人"],
-  [/外音取り込み|ヒアスルー|アンビエント/, "つけたまま周りの音も聞きたい人"],
-  [/低遅延|ゲーミング|ゲームモード/, "動画やゲームで音のズレが気になる人"],
-  [/IPX?\d|防水|防滴/i, "運動中や雨の日にも使いたい人"],
-  [/GaN|窒化ガリウム/i, "充電器を小さく軽くしたい人"],
-  [/急速充電|高速充電|PD対応|PPS/i, "充電を待つ時間を短くしたい人"],
-  [/(1\d|[2-9]\d)\d{3}\s*mAh|大容量/i, "外出が長い日や旅行に持っていきたい人"],
-  [/静音/, "動作音が気になる場所で使いたい人"],
-
-  // --- 最後に調べる（どの商品にも付きやすい語なので） ---
-  [/Nano|ミニ|超小型|コンパクト|軽量/i, "荷物を少しでも軽くしたい人"],
-];
-const AUDIENCE_ENDINGS = ["に良さそう。", "にはちょうどいいかも。", "に向いていそう。"];
-
-/** 商品ごとに決まった数を返す（同じ商品なら毎回同じ言い回しになり、商品が変われば変わる） */
-function hashOf(text) {
-  let h = 0;
-  for (const ch of String(text)) h = (h * 31 + ch.codePointAt(0)) >>> 0;
-  return h;
-}
-
-/** A: 向いていそうな人 */
-function audienceLine(item, specs) {
-  const haystack = `${item.itemName} ${specs.join(" ")}`;
-  const hit = AUDIENCE_RULES.find(([pattern]) => pattern.test(haystack));
-  if (!hit) return "";
-  return hit[1] + AUDIENCE_ENDINGS[hashOf(item.itemCode) % AUDIENCE_ENDINGS.length];
-}
-
-/** B: レビューの数字への反応 */
-function reviewLine(item, genre) {
-  const count = Number(item.reviewCount);
-  const average = Number(item.reviewAverage);
-  const stars = average.toFixed(1);
-  const rank = Number(item.rank);
-  const variant = hashOf(`${item.itemCode}:review`) % 2;
-  if (count >= 1000 && average >= 4.4) {
-    const rounded = `${(Math.floor(count / 1000) * 1000).toLocaleString("ja-JP")}件以上`;
-    return variant === 0
-      ? `レビュー${rounded}で★${stars}。これだけ数があると、選ぶときの安心感がちがう。`
-      : `レビュー${rounded}で★${stars}。数も評価もそろっているのは強い。`;
-  }
-  if (count >= 300 && average >= 4.3) {
-    const shown = count.toLocaleString("ja-JP");
-    return variant === 0
-      ? `レビュー${shown}件で★${stars}。評価が安定していて参考にしやすい。`
-      : `レビュー${shown}件で★${stars}。買った人の満足度が高めなのが分かる。`;
-  }
-  if (average >= 4.6) return `★${stars}はかなり高め。`;
-  if (rank >= 1 && rank <= 10) return `${genre.name}のランキングで${rank}位。いま売れているのが分かる。`;
-  return "";
-}
-
 async function loadShown() {
   try {
     const data = JSON.parse(await readFile(SHOWN_PATH, "utf-8"));
@@ -221,7 +100,7 @@ function plainItemUrl(item) {
 function renderCard({ genre, item, name, comment }, index) {
   const image = imageUrlOf(item);
   const link = plainItemUrl(item);
-  const rows = Math.min(14, comment.split("\n").length + 1);
+  const rows = Math.min(26, comment.split("\n").length + 1);
   const rank = Number(item.rank) ? ` · ランキング${Number(item.rank)}位` : "";
 
   return `
