@@ -216,18 +216,15 @@ export function buildTags(item, genre) {
   // 商品そのものを表すタグは先頭だけを見て、機能を表すタグ（防水・静音など）は全体を見る。
   const head = name.slice(0, HEAD_LENGTH);
 
-  const pick = (text, scope) => {
-    const found = [];
-    for (const rule of TAG_RULES) {
-      const target = rule.scope === "full" ? text : scope;
-      if (rule.pattern.test(target)) found.push(...rule.tags);
-    }
-    return found;
-  };
+  const pick = (text, scope) =>
+    TAG_RULES.filter((rule) => (rule.scope ?? "head") === scope && rule.pattern.test(text)).flatMap(
+      (rule) => rule.tags
+    );
 
-  // 先頭からは何も拾えなかったときだけ、商品名の全体から探す
-  let matched = pick(name, head);
-  if (!matched.length) matched = pick(name, name);
+  // 商品そのもののタグ。先頭から拾えなかったときだけ、商品名の全体から探す
+  let productTags = pick(head, "head");
+  if (!productTags.length) productTags = pick(name, "head");
+  const matched = [...productTags, ...pick(name, "full")];
 
   const brand = BRAND_TAGS.find(([pattern]) => pattern.test(head));
   const tags = unique([
