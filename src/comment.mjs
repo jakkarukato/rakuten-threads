@@ -195,21 +195,18 @@ const BRAND_TAGS = [
 
 // ジャンルごとのタグ（商品から拾えたタグが少ないときの補い。config.mjs の genres[].tag とは別）
 const GENRE_TAGS = {
-  564500: ["#スマホアクセサリー", "#ガジェット", "#便利グッズ"],
-  100026: ["#デスク環境", "#作業効率化", "#ガジェット"],
-  211742: ["#ガジェット", "#おうち時間", "#オーディオ"],
-  562637: ["#便利家電", "#暮らしを整える", "#時短家電"],
+  564500: ["#スマホアクセサリー", "#ガジェット", "#便利グッズ", "#スマホグッズ", "#ガジェット好き"],
+  100026: ["#デスク環境", "#作業効率化", "#ガジェット", "#在宅ワーク", "#デスク周り"],
+  211742: ["#ガジェット", "#おうち時間", "#オーディオ", "#ガジェット好き", "#便利グッズ"],
+  562637: ["#便利家電", "#暮らしを整える", "#時短家電", "#生活家電", "#家電好き"],
 };
-
-// どの商品にも付けるタグ
-const BASE_TAGS = ["#楽天ROOM", "#楽天市場"];
 
 // 商品そのものを表すタグを探す範囲（商品名の先頭からの文字数）
 const HEAD_LENGTH = 36;
 
 /**
  * 商品名から関連するハッシュタグを作る。
- * 具体的なもの（商品の種類 → メーカー → ジャンル → 楽天）の順に並べ、最大 tagMax 個まで。
+ * 具体的なもの（商品の種類 → メーカー → ジャンル）の順に並べ、最大 tagMax 個まで。
  */
 export function buildTags(item, genre) {
   const raw = String(item.itemName ?? "");
@@ -234,10 +231,8 @@ export function buildTags(item, genre) {
 
   // ジャンルのタグは、足りないときだけ補う（関係の薄いタグを増やさないため）
   const fillers = (GENRE_TAGS[genre.id] ?? []).filter((tag) => !specific.includes(tag));
-  const need = Math.max(0, COMMENT.tagMin - BASE_TAGS.length - specific.length);
-  const body = [...specific, ...fillers.slice(0, need)].slice(0, COMMENT.tagMax - BASE_TAGS.length);
-
-  return unique([...body, ...BASE_TAGS]);
+  const need = Math.max(0, COMMENT.tagMin - specific.length);
+  return [...specific, ...fillers.slice(0, need)].slice(0, COMMENT.tagMax);
 }
 
 // どの商品にも当てはまる「購入前にチェック」
