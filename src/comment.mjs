@@ -102,8 +102,8 @@ const TAG_RULES = [
   { pattern: /モバイルバッテリー|\d{4,5}\s*mAh/i, tags: ["#モバイルバッテリー", "#充電器"] },
   { pattern: /充電器|急速充電|高速充電|PD対応|GaN|窒化ガリウム/i, tags: ["#充電器", "#急速充電"] },
   { pattern: /(type-?c|usb|lightning).{0,12}ケーブル|充電ケーブル/i, tags: ["#充電ケーブル"] },
-  { pattern: /MagSafe|マグセーフ/i, tags: ["#MagSafe"] },
-  { pattern: /ワイヤレス充電|\bQi2?\b/i, tags: ["#ワイヤレス充電"] },
+  { scope: "full", pattern: /MagSafe|マグセーフ/i, tags: ["#MagSafe"] },
+  { scope: "full", pattern: /ワイヤレス充電|\bQi2?\b/i, tags: ["#ワイヤレス充電"] },
   { pattern: /iPhone.{0,20}ケース|ケース.{0,10}iPhone/i, tags: ["#iPhoneケース", "#スマホケース"] },
   { pattern: /スマホケース|(Galaxy|Pixel|Android).{0,20}ケース/i, tags: ["#スマホケース"] },
   { pattern: /ガラスフィルム|保護フィルム|画面保護/, tags: ["#保護フィルム", "#スマホアクセサリー"] },
@@ -116,7 +116,7 @@ const TAG_RULES = [
   { pattern: /骨伝導|オープンイヤー|イヤーカフ|耳を(塞|ふさ)がない/, tags: ["#オープンイヤー", "#イヤホン"] },
   { pattern: /ヘッドホン|ヘッドフォン/, tags: ["#ヘッドホン"] },
   { pattern: /イヤホン/, tags: ["#イヤホン"] },
-  { pattern: /ノイズキャンセリング|ノイキャン|\bANC\b/i, tags: ["#ノイズキャンセリング"] },
+  { scope: "full", pattern: /ノイズキャンセリング|ノイキャン|\bANC\b/i, tags: ["#ノイズキャンセリング"] },
   { pattern: /スピーカー/, tags: ["#スピーカー", "#オーディオ"] },
   { pattern: /スマートウォッチ|活動量計/, tags: ["#スマートウォッチ"] },
   { pattern: /Fire\s*TV/i, tags: ["#FireTVStick", "#おうち時間"] },
@@ -127,7 +127,9 @@ const TAG_RULES = [
 
   // --- 記録メディア・PC周辺機器 ---
   { pattern: /microSD|SDXC|SDHC|SDカード/i, tags: ["#microSD", "#SDカード"] },
-  { pattern: /SSD|NVMe|外付けHDD|ハードディスク|\bHDD\b/i, tags: ["#SSD", "#外付けストレージ"] },
+  { pattern: /外付け\s*(SSD|HDD)|ポータブルSSD|外付けハードディスク/i, tags: ["#外付けストレージ"] },
+  { pattern: /\bSSD\b|NVMe/i, tags: ["#SSD"] },
+  { pattern: /\bHDD\b|ハードディスク/i, tags: ["#ハードディスク"] },
   { pattern: /USBメモリ/i, tags: ["#USBメモリ"] },
   { pattern: /キーボード/, tags: ["#キーボード", "#デスク環境"] },
   { pattern: /マウス|トラックボール/, tags: ["#マウス", "#デスク環境"] },
@@ -158,10 +160,10 @@ const TAG_RULES = [
   { pattern: /電気毛布|ヒーター|こたつ|暖房|セラミックファン/, tags: ["#あったかグッズ"] },
 
   // --- 機能（最後に調べる） ---
-  { pattern: /防水|IPX?\d/i, tags: ["#防水"] },
-  { pattern: /静音/, tags: ["#静音"] },
-  { pattern: /大容量/, tags: ["#大容量"] },
-  { pattern: /Nano|ミニ|超小型|コンパクト|軽量/i, tags: ["#コンパクト"] },
+  { scope: "full", pattern: /防水|IPX?\d/i, tags: ["#防水"] },
+  { scope: "full", pattern: /静音/, tags: ["#静音"] },
+  { scope: "full", pattern: /大容量/, tags: ["#大容量"] },
+  { scope: "full", pattern: /Nano|ミニ|超小型|コンパクト|軽量/i, tags: ["#コンパクト"] },
 ];
 
 // メーカー名。商品名に出てきたものだけ付ける
@@ -201,17 +203,33 @@ const GENRE_TAGS = {
 // どの商品にも付けるタグ
 const BASE_TAGS = ["#楽天ROOM", "#楽天市場"];
 
+// 商品そのものを表すタグを探す範囲（商品名の先頭からの文字数）
+const HEAD_LENGTH = 36;
+
 /**
  * 商品名から関連するハッシュタグを作る。
  * 具体的なもの（商品の種類 → メーカー → ジャンル → 楽天）の順に並べ、最大 tagMax 個まで。
  */
 export function buildTags(item, genre) {
-  const name = String(item.itemName ?? "");
-  const matched = [];
-  for (const rule of TAG_RULES) {
-    if (rule.pattern.test(name)) matched.push(...rule.tags);
-  }
-  const brand = BRAND_TAGS.find(([pattern]) => pattern.test(name));
+  const name = cleanItemName(String(item.itemName ?? ""), 300);
+  // 商品名の後ろには「対応機種」や付属品が並ぶことが多い。
+  // 商品そのものを表すタグは先頭だけを見て、機能を表すタグ（防水・静音など）は全体を見る。
+  const head = name.slice(0, HEAD_LENGTH);
+
+  const pick = (text, scope) => {
+    const found = [];
+    for (const rule of TAG_RULES) {
+      const target = rule.scope === "full" ? text : scope;
+      if (rule.pattern.test(target)) found.push(...rule.tags);
+    }
+    return found;
+  };
+
+  // 先頭からは何も拾えなかったときだけ、商品名の全体から探す
+  let matched = pick(name, head);
+  if (!matched.length) matched = pick(name, name);
+
+  const brand = BRAND_TAGS.find(([pattern]) => pattern.test(head));
   const tags = unique([
     ...matched,
     brand ? brand[1] : "",
