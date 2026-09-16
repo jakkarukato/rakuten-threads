@@ -211,7 +211,9 @@ const HEAD_LENGTH = 36;
  * 具体的なもの（商品の種類 → メーカー → ジャンル → 楽天）の順に並べ、最大 tagMax 個まで。
  */
 export function buildTags(item, genre) {
-  const name = cleanItemName(String(item.itemName ?? ""), 300);
+  const raw = String(item.itemName ?? "");
+  // 販促文句を外した名前。カッコの中は消えるので、全体から探すときは元の商品名を使う
+  const name = cleanItemName(raw, 300);
   // 商品名の後ろには「対応機種」や付属品が並ぶことが多い。
   // 商品そのものを表すタグは先頭だけを見て、機能を表すタグ（防水・静音など）は全体を見る。
   const head = name.slice(0, HEAD_LENGTH);
@@ -223,8 +225,8 @@ export function buildTags(item, genre) {
 
   // 商品そのもののタグ。先頭から拾えなかったときだけ、商品名の全体から探す
   let productTags = pick(head, "head");
-  if (!productTags.length) productTags = pick(name, "head");
-  const matched = [...productTags, ...pick(name, "full")];
+  if (!productTags.length) productTags = pick(raw, "head");
+  const matched = [...productTags, ...pick(raw, "full")];
 
   const brand = BRAND_TAGS.find(([pattern]) => pattern.test(head));
   const tags = unique([
