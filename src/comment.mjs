@@ -27,6 +27,9 @@ export const COMMENT = {
   specLimit: 5,
   whoLimit: 4,
   checkLimit: 6,
+
+  // ハッシュタグの最大数。商品から拾えたタグが少なくても、ジャンルのタグで5個以上になるようにする
+  tagMax: 8,
 };
 
 // ------------------------------------------------------------
@@ -88,6 +91,136 @@ const GENRE_AUDIENCE = {
   211742: ["音や映像まわりを充実させたい人", "家での楽しみを増やしたい人"],
   562637: ["暮らしを少し便利にしたい人", "毎日の手間を少し減らしたい人"],
 };
+
+// ------------------------------------------------------------
+//  ハッシュタグ
+//  商品名に出てきた言葉から、関連するものだけを付ける。
+//  上から順に見て、当てはまったものを前に並べる（具体的なものほど前）。
+// ------------------------------------------------------------
+const TAG_RULES = [
+  // --- スマホまわり ---
+  { pattern: /モバイルバッテリー|\d{4,5}\s*mAh/i, tags: ["#モバイルバッテリー", "#充電器"] },
+  { pattern: /充電器|急速充電|高速充電|PD対応|GaN|窒化ガリウム/i, tags: ["#充電器", "#急速充電"] },
+  { pattern: /(type-?c|usb|lightning).{0,12}ケーブル|充電ケーブル/i, tags: ["#充電ケーブル"] },
+  { pattern: /MagSafe|マグセーフ/i, tags: ["#MagSafe"] },
+  { pattern: /ワイヤレス充電|\bQi2?\b/i, tags: ["#ワイヤレス充電"] },
+  { pattern: /iPhone.{0,20}ケース|ケース.{0,10}iPhone/i, tags: ["#iPhoneケース", "#スマホケース"] },
+  { pattern: /スマホケース|(Galaxy|Pixel|Android).{0,20}ケース/i, tags: ["#スマホケース"] },
+  { pattern: /ガラスフィルム|保護フィルム|画面保護/, tags: ["#保護フィルム", "#スマホアクセサリー"] },
+  { pattern: /カメラ保護|レンズ保護|カメラフィルム/, tags: ["#カメラ保護", "#スマホアクセサリー"] },
+  { pattern: /スマホ\s*リング|スマホスタンド|スマホホルダー|車載/, tags: ["#スマホスタンド"] },
+  { pattern: /iPhone/i, tags: ["#iPhone"] },
+
+  // --- オーディオ・映像・カメラ ---
+  { pattern: /ワイヤレスイヤホン|完全ワイヤレス|Bluetooth.{0,8}イヤホン/i, tags: ["#ワイヤレスイヤホン", "#イヤホン"] },
+  { pattern: /骨伝導|オープンイヤー|イヤーカフ|耳を(塞|ふさ)がない/, tags: ["#オープンイヤー", "#イヤホン"] },
+  { pattern: /ヘッドホン|ヘッドフォン/, tags: ["#ヘッドホン"] },
+  { pattern: /イヤホン/, tags: ["#イヤホン"] },
+  { pattern: /ノイズキャンセリング|ノイキャン|\bANC\b/i, tags: ["#ノイズキャンセリング"] },
+  { pattern: /スピーカー/, tags: ["#スピーカー", "#オーディオ"] },
+  { pattern: /スマートウォッチ|活動量計/, tags: ["#スマートウォッチ"] },
+  { pattern: /Fire\s*TV/i, tags: ["#FireTVStick", "#おうち時間"] },
+  { pattern: /Chromecast|ストリーミング/i, tags: ["#ストリーミング", "#おうち時間"] },
+  { pattern: /テレビ保護パネル|液晶保護パネル/, tags: ["#テレビ", "#液晶保護"] },
+  { pattern: /プロジェクター/, tags: ["#プロジェクター", "#おうち時間"] },
+  { pattern: /三脚|ジンバル|一眼|ミラーレス|望遠レンズ/, tags: ["#カメラ", "#カメラ好き"] },
+
+  // --- 記録メディア・PC周辺機器 ---
+  { pattern: /microSD|SDXC|SDHC|SDカード/i, tags: ["#microSD", "#SDカード"] },
+  { pattern: /SSD|NVMe|外付けHDD|ハードディスク|\bHDD\b/i, tags: ["#SSD", "#外付けストレージ"] },
+  { pattern: /USBメモリ/i, tags: ["#USBメモリ"] },
+  { pattern: /キーボード/, tags: ["#キーボード", "#デスク環境"] },
+  { pattern: /マウス|トラックボール/, tags: ["#マウス", "#デスク環境"] },
+  { pattern: /モニター|ディスプレイ/, tags: ["#モニター", "#デスク環境"] },
+  { pattern: /モニターアーム|デスクライト|PCスタンド|ノートパソコンスタンド/, tags: ["#デスク環境", "#作業効率化"] },
+  { pattern: /USBハブ|ドッキングステーション|変換アダプタ/i, tags: ["#USBハブ", "#PC周辺機器"] },
+  { pattern: /プリンター|複合機/, tags: ["#プリンター"] },
+  { pattern: /ブルーレイ|Blu-?ray|DVDドライブ|光学ドライブ/i, tags: ["#外付けドライブ", "#PC周辺機器"] },
+  { pattern: /シュレッダー/, tags: ["#シュレッダー", "#書類整理"] },
+  { pattern: /ノート\s*パソコン|ノートPC|デスクトップ\s*(パソコン|PC)/i, tags: ["#パソコン"] },
+  { pattern: /ルーター|Wi-?Fi\s*[67]|無線LAN|中継機/i, tags: ["#WiFiルーター", "#ネット環境"] },
+
+  // --- 家電・暮らし ---
+  { pattern: /ドライヤー/, tags: ["#ドライヤー", "#ヘアケア"] },
+  { pattern: /ヘアアイロン|カールアイロン|ストレートアイロン|コテ/, tags: ["#ヘアアイロン", "#ヘアケア"] },
+  { pattern: /脱毛器|美顔器|美容家電/, tags: ["#美容家電"] },
+  { pattern: /除湿機|衣類乾燥/, tags: ["#除湿機", "#部屋干し"] },
+  { pattern: /加湿器/, tags: ["#加湿器", "#乾燥対策"] },
+  { pattern: /空気清浄機/, tags: ["#空気清浄機"] },
+  { pattern: /ロボット掃除機/, tags: ["#ロボット掃除機", "#時短家電"] },
+  { pattern: /掃除機|クリーナー/, tags: ["#掃除機", "#掃除グッズ"] },
+  { pattern: /自動調理|電気圧力鍋|スープメーカー/, tags: ["#キッチン家電", "#時短家電"] },
+  { pattern: /ミキサー|ブレンダー|豆乳メーカー/, tags: ["#キッチン家電"] },
+  { pattern: /電子レンジ|オーブン|トースター|炊飯器|ケトル|コーヒーメーカー|ホットプレート/, tags: ["#キッチン家電"] },
+  { pattern: /冷蔵庫\s*マット|キズ防止|傷防止|床保護/, tags: ["#床保護", "#新生活"] },
+  { pattern: /冷蔵庫|洗濯機|エアコン/, tags: ["#生活家電"] },
+  { pattern: /扇風機|サーキュレーター/, tags: ["#サーキュレーター"] },
+  { pattern: /電気毛布|ヒーター|こたつ|暖房|セラミックファン/, tags: ["#あったかグッズ"] },
+
+  // --- 機能（最後に調べる） ---
+  { pattern: /防水|IPX?\d/i, tags: ["#防水"] },
+  { pattern: /静音/, tags: ["#静音"] },
+  { pattern: /大容量/, tags: ["#大容量"] },
+  { pattern: /Nano|ミニ|超小型|コンパクト|軽量/i, tags: ["#コンパクト"] },
+];
+
+// メーカー名。商品名に出てきたものだけ付ける
+const BRAND_TAGS = [
+  [/\bAnker\b/i, "#Anker"],
+  [/TORRAS/i, "#TORRAS"],
+  [/エレコム|ELECOM/i, "#エレコム"],
+  [/バッファロー|BUFFALO/i, "#バッファロー"],
+  [/SanDisk|サンディスク/i, "#SanDisk"],
+  [/ロジクール|Logicool/i, "#ロジクール"],
+  [/アイリスオーヤマ|アイリスプラザ|IRIS\s*OHYAMA/i, "#アイリスオーヤマ"],
+  [/recolte|レコルト/i, "#レコルト"],
+  [/SOUNDPEATS/i, "#SOUNDPEATS"],
+  [/EarFun/i, "#EarFun"],
+  [/\bJBL\b/i, "#JBL"],
+  [/\bBOSE\b/i, "#BOSE"],
+  [/\bSONY\b|ソニー/i, "#ソニー"],
+  [/シャープ|SHARP/i, "#シャープ"],
+  [/パナソニック|Panasonic/i, "#パナソニック"],
+  [/Xiaomi|シャオミ/i, "#Xiaomi"],
+  [/UGREEN/i, "#UGREEN"],
+  [/Baseus/i, "#Baseus"],
+  [/AVIOT/i, "#AVIOT"],
+  [/\bCIO\b/, "#CIO"],
+  [/山善|YAMAZEN/i, "#山善"],
+  [/\bAmazon\b|アマゾン/i, "#Amazon"],
+];
+
+// ジャンルごとのタグ（商品から拾えたタグが少ないときの補い。config.mjs の genres[].tag とは別）
+const GENRE_TAGS = {
+  564500: ["#スマホアクセサリー", "#ガジェット", "#便利グッズ"],
+  100026: ["#デスク環境", "#作業効率化", "#ガジェット"],
+  211742: ["#オーディオ", "#おうち時間", "#ガジェット好きな人と繋がりたい"],
+  562637: ["#時短家電", "#便利家電", "#暮らしを整える"],
+};
+
+// どの商品にも付けるタグ
+const BASE_TAGS = ["#楽天ROOM", "#楽天市場"];
+
+/**
+ * 商品名から関連するハッシュタグを作る。
+ * 具体的なもの（商品の種類 → メーカー → ジャンル → 楽天）の順に並べ、最大 tagMax 個まで。
+ */
+export function buildTags(item, genre) {
+  const name = String(item.itemName ?? "");
+  const matched = [];
+  for (const rule of TAG_RULES) {
+    if (rule.pattern.test(name)) matched.push(...rule.tags);
+  }
+  const brand = BRAND_TAGS.find(([pattern]) => pattern.test(name));
+  const tags = unique([
+    ...matched,
+    brand ? brand[1] : "",
+    genre.tag,
+    ...(GENRE_TAGS[genre.id] ?? []),
+    ...BASE_TAGS,
+  ]);
+  return tags.slice(0, COMMENT.tagMax);
+}
 
 // どの商品にも当てはまる「購入前にチェック」
 const GENERIC_CHECKS = [
@@ -189,6 +322,7 @@ export function buildComment(item, genre) {
   const seed = hashOf(item.itemCode);
   const specs = extractSpecs(item.itemName, COMMENT.specLimit);
   const name = displayName(item.itemName, specs);
+  const tags = buildTags(item, genre);
   const topics = TOPICS.filter((t) => t.pattern.test(`${item.itemName} ${specs.join(" ")}`));
 
   const whoList = unique([
@@ -235,7 +369,7 @@ export function buildComment(item, genre) {
     if (p.w > 0) lines.push("", "■こんな人に", ...otherWho.slice(0, p.w).map((w) => `・${w}`));
     if (p.c > 0) lines.push("", "■購入前にチェック", ...checks.slice(0, p.c).map((c) => `・${c}`));
     if (p.closing) lines.push("", closing);
-    if (genre.tag) lines.push("", genre.tag);
+    if (tags.length) lines.push("", tags.join(" "));
     return lines.join("\n");
   };
 
