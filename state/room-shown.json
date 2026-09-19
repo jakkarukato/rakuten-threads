@@ -238,5 +238,53 @@
     "name": "パナソニック 2025年度モデル",
     "genre": "家電",
     "shownAt": "2026-09-18T21:10:13.107Z"
+  },
+  {
+    "itemCode": "keitai:10814352",
+    "name": "iFace First Class Standard MagSynq",
+    "genre": "スマホ・タブレット",
+    "shownAt": "2026-09-19T21:10:01.871Z"
+  },
+  {
+    "itemCode": "besthouse:10000081",
+    "name": "充電器タイプc 急速充電器 ACアダプター iphone 充電器",
+    "genre": "スマホ・タブレット",
+    "shownAt": "2026-09-19T21:10:01.871Z"
+  },
+  {
+    "itemCode": "tplinkdirect:10001261",
+    "name": "TP-Link WiFi6 無線LAN",
+    "genre": "PC・周辺機器",
+    "shownAt": "2026-09-19T21:10:01.871Z"
+  },
+  {
+    "itemCode": "rcmdse:16154599",
+    "name": "シュレッダー A4 家庭用 クロスカット 静音",
+    "genre": "PC・周辺機器",
+    "shownAt": "2026-09-19T21:10:01.871Z"
+  },
+  {
+    "itemCode": "jism:14355730",
+    "name": "パナソニック",
+    "genre": "オーディオ・カメラ",
+    "shownAt": "2026-09-19T21:10:01.871Z"
+  },
+  {
+    "itemCode": "superdeal:10006200",
+    "name": "KIOXIA microSDカード",
+    "genre": "オーディオ・カメラ",
+    "shownAt": "2026-09-19T21:10:01.871Z"
+  },
+  {
+    "itemCode": "tac-online:10005862",
+    "name": "マキタ 掃除機 コードレス CL116DW 日本製",
+    "genre": "家電",
+    "shownAt": "2026-09-19T21:10:01.871Z"
+  },
+  {
+    "itemCode": "roomy:10015766",
+    "name": "レコルト 豆乳メーカー 全自動 豆乳機",
+    "genre": "家電",
+    "shownAt": "2026-09-19T21:10:01.871Z"
   }
 ]
