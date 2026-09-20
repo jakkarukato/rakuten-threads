@@ -20,8 +20,11 @@ import { buildComment } from "./comment.mjs";
 
 // ---------- 設定 ----------
 const ROOM = {
-  // ジャンルごとに何件ずつ候補を出すか（4ジャンル×2件＝1日8件）
-  perGenre: 2,
+  // 1日に出す候補の数
+  total: 10,
+
+  // 1つのジャンルから取る上限（ふだんは 3+3+2+2 で10件。取れないジャンルがあれば他のジャンルで補う）
+  perGenre: 4,
 
   // 一度候補に出した商品を、何日間は出さないか
   skipDays: 60,
@@ -221,7 +224,7 @@ async function main() {
     shown.filter((entry) => Date.parse(entry.shownAt) >= cutoff).map((entry) => entry.itemCode)
   );
 
-  const picks = [];
+  const lists = [];
   for (const [index, genre] of config.genres.entries()) {
     // 楽天APIのレート制限対策（1.5秒以上あける）
     if (index > 0) await sleep(2000);
@@ -234,13 +237,32 @@ async function main() {
       continue;
     }
 
-    const fresh = items.filter((item) => !recent.has(item.itemCode)).slice(0, ROOM.perGenre);
-    console.log(`${genre.name}: 条件を満たす商品 ${items.length}件 → 候補 ${fresh.length}件`);
+    const fresh = items.filter((item) => !recent.has(item.itemCode));
+    console.log(`${genre.name}: 条件を満たす商品 ${items.length}件 → まだ出していない商品 ${fresh.length}件`);
+    lists.push({ genre, items: fresh });
+  }
 
-    for (const item of fresh) {
-      const { name, text } = buildComment(item, genre);
-      picks.push({ genre, item, name, comment: text });
+  // ジャンルを順番に回りながら1件ずつ取り、合計 ROOM.total 件になるまで選ぶ。
+  // 3件取れるジャンルが日によって変わるように、開始するジャンルをずらす。
+  const picks = [];
+  if (lists.length) {
+    const offset = Math.floor(Date.now() / 86_400_000) % lists.length;
+    for (let round = 0; round < ROOM.perGenre && picks.length < ROOM.total; round++) {
+      for (let i = 0; i < lists.length && picks.length < ROOM.total; i++) {
+        const list = lists[(offset + i) % lists.length];
+        const item = list.items[round];
+        if (!item) continue;
+        const { name, text } = buildComment(item, list.genre);
+        picks.push({ genre: list.genre, item, name, comment: text });
+      }
     }
+  }
+
+  if (picks.length < ROOM.total) {
+    console.log(
+      `※ 候補が ${picks.length}件しか選べませんでした（目標 ${ROOM.total}件）。` +
+        `${ROOM.skipDays}日以内に出した商品は除いているためです。`
+    );
   }
 
   if (picks.length === 0) {
