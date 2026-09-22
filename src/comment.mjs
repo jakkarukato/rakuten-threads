@@ -73,7 +73,7 @@ const TOPICS = [
   { kind: "product", noun: "プリンター", pattern: /プリンター|複合機/, who: "家で書類や写真を印刷したい人", check: "インクの種類と、スマホから印刷できるか。" },
   { kind: "product", noun: "外付けドライブ", pattern: /ブルーレイ|Blu-?ray|DVDドライブ|光学ドライブ/i, who: "ドライブのないPCでディスクを使いたい人", check: "再生用のソフトが付属しているか。PCの接続端子（USB-A / USB-C）に合うか。" },
   { kind: "product", noun: "シュレッダー", pattern: /シュレッダー/, who: "家で書類をまとめて処分したい人", check: "一度に裁断できる枚数と、ホチキスの針やカードに対応しているか。" },
-  { kind: "product", noun: "収納グッズ", pattern: /収納|ラック|アーム金具|ホルダー|スタンド/, who: "机まわりを片づけたい人", check: "取り付けられる場所と、耐えられる重さ。" },
+  { kind: "product", noun: "収納グッズ", pattern: /収納|ラック|アーム金具|壁掛け/, who: "置き場所をすっきり片づけたい人", check: "取り付けられる場所と、耐えられる重さ。" },
   { kind: "product", noun: "$match", pattern: /microSD|SDカード|USBメモリ/i, who: "写真や動画をたくさん保存したい人", check: "使う機器が対応している容量と規格（SDXC・UHS-Iなど）。" },
   { kind: "product", noun: "$match", pattern: /外付けHDD|外付けSSD|ポータブルSSD|ハードディスク|SSD|HDD/i, who: "写真や動画、録画した番組をたくさん保存したい人", check: "容量と、パソコンやテレビにつなぐ端子が合うか。" },
 
@@ -89,6 +89,7 @@ const TOPICS = [
   { kind: "product", noun: "カメラ用品", pattern: /三脚|ジンバル|一眼|ミラーレス|望遠レンズ/, who: "写真や動画をきれいに撮りたい人", check: "手持ちの機材に取り付けられるか。重さ。" },
 
   // --- 商品の種類：スマホまわり ---
+  { kind: "product", noun: "タブレット", pattern: /(Android|Wi-?Fi|SIMフリー|\d+(\.\d+)?インチ).{0,10}タブレット|タブレット.{0,10}(\d+(\.\d+)?インチ|Wi-?Fiモデル|本体)/i, who: "動画や読書を大きな画面で楽しみたい人", check: "画面のサイズと重さ、Wi-FiモデルかSIM対応モデルか。" },
   { kind: "product", noun: "モバイルバッテリー", pattern: /モバイルバッテリー|Power\s*Bank/i, who: "外出先で充電が切れると困る人", check: "容量（mAh）と、飛行機に持ち込めるかどうか。" },
   { kind: "product", noun: "充電器", pattern: /充電器|急速充電器|ACアダプタ/, who: "充電まわりを整理したい人", check: "出力（W数）と、同時に充電できるポートの数。" },
   { kind: "product", noun: "充電ケーブル", pattern: /ケーブル/i, who: "充電やデータ転送のケーブルを買い替えたい人", check: "両端の端子の組み合わせと長さ、対応する充電の出力（W数）。" },
@@ -103,10 +104,10 @@ const TOPICS = [
   { kind: "feature", pattern: /マルチポイント/, who: "スマホとPCを行き来しながら使う人", check: "同時に接続できる台数と、対応している機器。" },
   { kind: "feature", pattern: /外音取り込み|ヒアスルー|アンビエント/, who: "つけたまま周りの音も聞きたい人", check: "外音取り込みの切り替え方法（ボタンかアプリか）。" },
   { kind: "feature", pattern: /低遅延|ゲーミング|ゲームモード/, who: "動画やゲームで音のズレが気になる人", check: "低遅延モードが使える接続方法と対応機器。" },
-  { kind: "feature", pattern: /IPX?\d|防水|防滴/i, who: "運動中や雨の日にも使いたい人", check: "防水等級（IPX〇）の数字。数字によって耐えられる水の量が違う。" },
+  { kind: "feature", pattern: /IPX?\d|防水|防滴/i, who: "水まわりや屋外でも使いたい人", check: "防水等級（IPX〇）の数字。数字によって耐えられる水の量が違う。" },
   { kind: "feature", pattern: /GaN|窒化ガリウム/i, who: "充電器を小さく軽くしたい人", check: "出力（W数）と、同時に充電できるポートの数。" },
   { kind: "feature", pattern: /急速充電|高速充電|PD対応|PPS/i, who: "充電を待つ時間を短くしたい人", check: "急速充電を活かすには、ケーブルとスマホ側の対応も必要。" },
-  { kind: "feature", pattern: /(1\d|[2-9]\d)\d{3}\s*mAh|大容量/i, who: "外出が長い日や旅行に持っていきたい人", check: "容量が大きいほど重くなるので、持ち歩く頻度とのバランス。" },
+  { kind: "feature", pattern: /(1\d|[2-9]\d)\d{3}\s*mAh/i, who: "外出が長い日や旅行に持っていきたい人", check: "容量が大きいほど重くなるので、持ち歩く頻度とのバランス。" },
   { kind: "feature", pattern: /静音/, who: "動作音が気になる場所で使いたい人", check: "動作音の大きさ（dB）が書かれているか。" },
   { kind: "feature", pattern: /Nano|ミニ|超小型|コンパクト|軽量/i, who: "置き場所や持ち運びで困りたくない人", check: "サイズと重さの数値。" },
 ];
@@ -357,6 +358,13 @@ function reviewSentence(item, seed) {
   return `レビューは${count.toLocaleString("ja-JP")}件で★${stars}。`;
 }
 
+/** 商品名から拾った言葉を、書き出しで使う形にそろえる（「sdカード」→「SDカード」など） */
+function normalizeNoun(word) {
+  const w = String(word).trim();
+  if (/^micro\s*sd$/i.test(w)) return "microSDカード";
+  return w.replace(/^micro\s*sd/i, "microSD").replace(/^sd/i, "SD").replace(/ssd|hdd/gi, (s) => s.toUpperCase());
+}
+
 /**
  * 商品の種類を1つに決める。
  * ・first: true の種類（ケースやフィルムなどのアクセサリー）が商品名の先頭にあれば、それを使う
@@ -413,7 +421,7 @@ export function buildComment(item, genre) {
   let lead = "";
   if (productTopic) {
     leadWho = productTopic.who;
-    const noun = productTopic.noun === "$match" ? found.match : productTopic.noun;
+    const noun = productTopic.noun === "$match" ? normalizeNoun(found.match) : productTopic.noun;
     lead = LEAD_TEMPLATES[seed % LEAD_TEMPLATES.length](leadWho, noun);
   } else if (featureTopic) {
     leadWho = featureTopic.who;
