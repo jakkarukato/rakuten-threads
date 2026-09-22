@@ -27,7 +27,7 @@ const ROOM = {
   perGenre: 4,
 
   // 一度候補に出した商品を、何日間は出さないか
-  skipDays: 60,
+  skipDays: 30,
 
   // 紹介文の中身（文字数、PR表記など）の設定は src/comment.mjs の COMMENT にある。
 };

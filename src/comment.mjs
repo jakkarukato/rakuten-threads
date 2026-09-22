@@ -39,50 +39,73 @@ export const COMMENT = {
 //  商品の種類を先に、どの商品にも付きやすい語（コンパクト等）を最後に並べる。
 //  ★どちらも事実や一般的な注意だけ。使ってみた感想は書かない。
 // ------------------------------------------------------------
+//  ★kind: "product" は商品の種類、"feature" は機能。書き出しの一文には商品の種類を使う。
+//    noun は書き出しで使う言葉（「〇〇向けの【モバイルバッテリー】。」）。
 const TOPICS = [
   // --- 商品の種類：家電 ---
-  { pattern: /ヘアアイロン|カールアイロン|ストレートアイロン|コテ/, who: "髪のセットの時間を短くしたい人", check: "プレートの幅（mm）と、設定できる温度の範囲。" },
-  { pattern: /ドライヤー/, who: "髪を乾かす時間を短くしたい人", check: "風量と本体の重さ、コードの長さ。" },
-  { pattern: /除湿機|衣類乾燥/, who: "部屋干しの洗濯物を早く乾かしたい人", check: "1日あたりの除湿量（L）と、タンクの容量。" },
-  { pattern: /豆乳メーカー|ミキサー|ブレンダー|スープメーカー/, who: "手作りの飲み物やスープを手軽に作りたい人", check: "一度に作れる量と、使ったあとに洗う部品の数。" },
-  { pattern: /シュレッダー/, who: "家で書類をまとめて処分したい人", check: "一度に裁断できる枚数と、ホチキスの針やカードに対応しているか。" },
-  { pattern: /自動調理|電気圧力鍋/, who: "料理の手間を減らしたい人", check: "容量によって一度に作れる量が変わるので、家族の人数に合うか。" },
-  { pattern: /ロボット掃除機/, who: "掃除の時間を減らしたい人", check: "越えられる段差の高さと、充電台を置く場所があるか。" },
-  { pattern: /冷蔵庫\s*マット|キズ防止|傷防止|床保護/, who: "床の傷やへこみが気になる人", check: "冷蔵庫の幅と奥行きに合うサイズか。置く前に測っておくと失敗しにくい。" },
+  { kind: "product", noun: "ヘアアイロン", pattern: /ヘアアイロン|カールアイロン|ストレートアイロン|コテ/, who: "髪のセットの時間を短くしたい人", check: "プレートの幅（mm）と、設定できる温度の範囲。" },
+  { kind: "product", noun: "ドライヤー", pattern: /ドライヤー/, who: "髪を乾かす時間を短くしたい人", check: "風量と本体の重さ、コードの長さ。" },
+  { kind: "product", noun: "美容家電", pattern: /脱毛器|美顔器|美容家電|頭皮ケア/, who: "自宅でスキンケアやボディケアをしたい人", check: "使える部位と、替えパーツやカートリッジの有無。" },
+  { kind: "product", noun: "除湿機", pattern: /除湿機|除湿器|衣類乾燥/, who: "部屋干しの洗濯物を早く乾かしたい人", check: "1日あたりの除湿量（L）と、タンクの容量。" },
+  { kind: "product", noun: "加湿器", pattern: /加湿器/, who: "冬の乾燥が気になる人", check: "適用畳数と、給水やお手入れのしやすさ。" },
+  { kind: "product", noun: "空気清浄機", pattern: /空気清浄機/, who: "ホコリや花粉が気になる人", check: "適用畳数と、交換フィルターの値段。" },
+  { kind: "product", noun: "サーキュレーター", pattern: /サーキュレーター|扇風機/, who: "部屋の空気を動かしたい人", check: "首振りの範囲と、風量の段階。" },
+  { kind: "product", noun: "暖房グッズ", pattern: /電気毛布|こたつ|セラミックファンヒーター|パネルヒーター|ホットカーペット/, who: "足元や寝るときの寒さをどうにかしたい人", check: "電気代の目安と、洗えるかどうか。" },
+  { kind: "product", noun: "ロボット掃除機", pattern: /ロボット掃除機/, who: "掃除の時間を減らしたい人", check: "越えられる段差の高さと、充電台を置く場所があるか。" },
+  { kind: "product", noun: "掃除機", pattern: /掃除機|クリーナー|スティッククリーナー/, who: "家の掃除をこまめにしたい人", check: "連続で使える時間と、本体の重さ。紙パック式かサイクロン式か。" },
+  { kind: "product", noun: "調理家電", pattern: /自動調理|電気圧力鍋|スープメーカー/, who: "料理の手間を減らしたい人", check: "容量によって一度に作れる量が変わるので、家族の人数に合うか。" },
+  { kind: "product", noun: "キッチン家電", pattern: /豆乳メーカー|ミキサー|ブレンダー|フードプロセッサー/, who: "手作りの飲み物やスープを手軽に作りたい人", check: "一度に作れる量と、使ったあとに洗う部品の数。" },
+  { kind: "product", noun: "コーヒーメーカー", pattern: /コーヒーメーカー|エスプレッソマシン|全自動コーヒー/, who: "家でいれたてのコーヒーを飲みたい人", check: "豆から挽けるか、使える豆や粉の種類。" },
+  { kind: "product", noun: "キッチン家電", pattern: /炊飯器|トースター|電子レンジ|オーブン|電気ケトル|ホットプレート|卓上IH/, who: "毎日の食事の支度をラクにしたい人", check: "本体のサイズと、置き場所に収まるか。" },
+  { kind: "product", noun: "冷蔵庫マット", pattern: /冷蔵庫\s*マット|キズ防止|傷防止|床保護/, who: "床の傷やへこみが気になる人", check: "冷蔵庫の幅と奥行きに合うサイズか。置く前に測っておくと失敗しにくい。" },
+  { kind: "product", noun: "生活家電", pattern: /冷蔵庫|洗濯機|エアコン/, who: "家電を買い替えたい人", check: "設置できるサイズと、搬入経路の幅。" },
 
   // --- 商品の種類：PC・周辺機器 ---
-  { pattern: /デスクトップ\s*パソコン|ノート\s*パソコン|ノートPC|デスクトップPC/i, who: "新しくパソコンを用意したい人", check: "CPU・メモリ・ストレージの数値と、使いたいソフトの動作条件。" },
-  { pattern: /プリンター|複合機/, who: "家で書類や写真を印刷したい人", check: "インクの種類と、スマホから印刷できるか。" },
-  { pattern: /ブルーレイ|Blu-?ray|DVDドライブ|光学ドライブ/i, who: "ドライブのないPCでディスクを使いたい人", check: "再生用のソフトが付属しているか。PCの接続端子（USB-A / USB-C）に合うか。" },
-  { pattern: /microSD|SDカード|SSD|USBメモリ|外付けHDD|ハードディスク|HDD/i, who: "写真や動画をたくさん保存したい人", check: "使う機器が対応している容量と規格。" },
+  { kind: "product", noun: "パソコン", pattern: /デスクトップ\s*パソコン|ノート\s*パソコン|ノートPC|デスクトップPC/i, who: "新しくパソコンを用意したい人", check: "CPU・メモリ・ストレージの数値と、使いたいソフトの動作条件。" },
+  { kind: "product", noun: "モニター", pattern: /モニター|ディスプレイ/, who: "画面を広く使って作業したい人", check: "画面のサイズと解像度、リフレッシュレート（Hz）。" },
+  { kind: "product", noun: "キーボード", pattern: /キーボード/, who: "打ちやすさにこだわりたい人", check: "接続方法（有線・Bluetooth）と、キー配列（日本語・英語）。" },
+  { kind: "product", noun: "マウス", pattern: /マウス|トラックボール/, who: "手の負担を減らしたい人", check: "サイズと重さ、静音かどうか。電池式か充電式か。" },
+  { kind: "product", noun: "USBハブ", pattern: /USBハブ|ドッキングステーション|変換アダプタ|変換アダプター/i, who: "パソコンの端子が足りない人", check: "使いたい端子の種類と数、映像出力に対応しているか。" },
+  { kind: "product", noun: "Wi-Fiルーター", pattern: /ルーター|無線LAN|中継機|Wi-?Fi\s*[67]/i, who: "家のネットが不安定で困っている人", check: "対応する回線の速度と、家の広さに合う推奨の間取り。" },
+  { kind: "product", noun: "セキュリティソフト", pattern: /セキュリティソフト|ウイルス対策|ノートン|ウイルスバスター|マカフィー|ESET/i, who: "パソコンやスマホを安全に使いたい人", check: "使える台数と契約の年数、対応しているOS。" },
+  { kind: "product", noun: "プリンター", pattern: /プリンター|複合機/, who: "家で書類や写真を印刷したい人", check: "インクの種類と、スマホから印刷できるか。" },
+  { kind: "product", noun: "外付けドライブ", pattern: /ブルーレイ|Blu-?ray|DVDドライブ|光学ドライブ/i, who: "ドライブのないPCでディスクを使いたい人", check: "再生用のソフトが付属しているか。PCの接続端子（USB-A / USB-C）に合うか。" },
+  { kind: "product", noun: "シュレッダー", pattern: /シュレッダー/, who: "家で書類をまとめて処分したい人", check: "一度に裁断できる枚数と、ホチキスの針やカードに対応しているか。" },
+  { kind: "product", noun: "収納グッズ", pattern: /収納|ラック|アーム金具|壁掛け/, who: "置き場所をすっきり片づけたい人", check: "取り付けられる場所と、耐えられる重さ。" },
+  { kind: "product", noun: "記録メディア", pattern: /microSD|SDカード|SSD|USBメモリ|外付けHDD|ハードディスク|HDD/i, who: "写真や動画をたくさん保存したい人", check: "使う機器が対応している容量と規格。" },
 
-  // --- 商品の種類：オーディオ・映像 ---
-  { pattern: /Fire TV|ストリーミング|Chromecast/i, who: "テレビで動画配信を見たい人", check: "テレビのHDMI端子に空きがあるか。" },
-  { pattern: /テレビ保護パネル|液晶保護パネル/, who: "テレビの画面を傷や衝撃から守りたい人", check: "テレビのインチ数と、取り付け方法。" },
-  { pattern: /骨伝導|オープンイヤー|イヤーカフ|耳を塞がない|耳をふさがない/, who: "耳をふさがずに音を聞きたい人", check: "音量を上げると音漏れしやすいので、使う場所に合うか。" },
-  { pattern: /イヤホン|ヘッドホン|ヘッドフォン/, who: "通勤や家事の合間に音楽を聴きたい人", check: "連続再生時間と、ケースを含めた合計の再生時間。" },
+  // --- 商品の種類：オーディオ・映像・カメラ ---
+  { kind: "product", noun: "ストリーミング端末", pattern: /Fire TV|ストリーミング|Chromecast/i, who: "テレビで動画配信を見たい人", check: "テレビのHDMI端子に空きがあるか。" },
+  { kind: "product", noun: "プロジェクター", pattern: /プロジェクター/, who: "家で大きな画面で映像を楽しみたい人", check: "明るさ（ルーメン）と、映したい壁までの距離。" },
+  { kind: "product", noun: "テレビ保護パネル", pattern: /テレビ保護パネル|液晶保護パネル/, who: "テレビの画面を傷や衝撃から守りたい人", check: "テレビのインチ数と、取り付け方法。" },
+  { kind: "product", noun: "スピーカー", pattern: /スピーカー|サウンドバー/, who: "家で音楽や映画の音を良くしたい人", check: "接続方法（Bluetooth・HDMI）と、置き場所に合うサイズ。" },
+  { kind: "product", noun: "イヤホン", pattern: /骨伝導|オープンイヤー|イヤーカフ|耳を塞がない|耳をふさがない/, who: "耳をふさがずに音を聞きたい人", check: "音量を上げると音漏れしやすいので、使う場所に合うか。" },
+  { kind: "product", noun: "ヘッドホン", pattern: /ヘッドホン|ヘッドフォン/, who: "音にしっかり包まれたい人", check: "本体の重さと、耳あての素材。" },
+  { kind: "product", noun: "イヤホン", pattern: /イヤホン/, who: "通勤や家事の合間に音楽を聴きたい人", check: "連続再生時間と、ケースを含めた合計の再生時間。" },
+  { kind: "product", noun: "スマートウォッチ", pattern: /スマートウォッチ|活動量計/, who: "運動や睡眠を記録したい人", check: "自分のスマホに対応しているか。電池の持ち。" },
+  { kind: "product", noun: "カメラ用品", pattern: /三脚|ジンバル|一眼|ミラーレス|望遠レンズ/, who: "写真や動画をきれいに撮りたい人", check: "手持ちの機材に取り付けられるか。重さ。" },
 
   // --- 商品の種類：スマホまわり ---
-  { pattern: /カメラ保護|カメラフィルム|レンズ保護/, who: "スマホのカメラの傷が気になる人", check: "対応機種の型番。似た名前の機種と間違えやすい。" },
-  { pattern: /保護フィルム|ガラスフィルム/, who: "画面の傷や割れが心配な人", check: "対応機種の型番と、ケースと干渉しないか。" },
-  { pattern: /(iPhone|スマホ|Galaxy|Pixel|Android).{0,20}ケース|ケース.{0,10}(iPhone|スマホ)/i, who: "スマホを落としたときの傷や割れが心配な人", check: "対応機種と、カメラ部分やボタンの位置が合うか。" },
+  { kind: "product", noun: "モバイルバッテリー", pattern: /モバイルバッテリー|Power\s*Bank/i, who: "外出先で充電が切れると困る人", check: "容量（mAh）と、飛行機に持ち込めるかどうか。" },
+  { kind: "product", noun: "充電器", pattern: /充電器|急速充電器|ACアダプタ/, who: "充電まわりを整理したい人", check: "出力（W数）と、同時に充電できるポートの数。" },
+  { kind: "product", noun: "充電ケーブル", pattern: /(type-?c|usb|lightning).{0,12}ケーブル|充電ケーブル/i, who: "充電やデータ転送のケーブルを買い替えたい人", check: "両端の端子の組み合わせと長さ、対応する充電の出力（W数）。" },
+  { kind: "product", noun: "カメラ保護フィルム", pattern: /カメラ保護|カメラフィルム|レンズ保護/, who: "スマホのカメラの傷が気になる人", check: "対応機種の型番。似た名前の機種と間違えやすい。" },
+  { kind: "product", noun: "保護フィルム", pattern: /保護フィルム|ガラスフィルム/, who: "画面の傷や割れが心配な人", check: "対応機種の型番と、ケースと干渉しないか。" },
+  { kind: "product", noun: "スマホケース", pattern: /(iPhone|スマホ|Galaxy|Pixel|Android).{0,20}ケース|ケース.{0,10}(iPhone|スマホ)/i, who: "スマホを落としたときの傷や割れが心配な人", check: "対応機種と、カメラ部分やボタンの位置が合うか。" },
 
-  // --- 機能 ---
-  { pattern: /端子一体|ケーブル内蔵|ケーブル一体|直挿し/, who: "ケーブルを持ち歩くのが面倒な人", check: "本体の端子（USB-C / Lightning）が自分のスマホに合うか。" },
-  { pattern: /(type-?c|USB|Lightning).{0,12}ケーブル|充電ケーブル/i, who: "充電やデータ転送のケーブルを買い替えたい人", check: "両端の端子の組み合わせと長さ、対応する充電の出力（W数）。" },
-  { pattern: /MagSafe|マグセーフ/i, who: "マグネットで充電器やアクセサリーを付けたい人", check: "MagSafe対応の充電器やアクセサリーと組み合わせて使えるか。" },
-  { pattern: /ノイズキャンセリング|ノイキャン|\bANC\b/i, who: "電車や人の多い場所で音楽を聴く人", check: "ノイズキャンセリングの効き方は環境で変わるので、レビューの声もあわせて。" },
-  { pattern: /マルチポイント/, who: "スマホとPCを行き来しながら使う人", check: "同時に接続できる台数と、対応している機器。" },
-  { pattern: /外音取り込み|ヒアスルー|アンビエント/, who: "つけたまま周りの音も聞きたい人", check: "外音取り込みの切り替え方法（ボタンかアプリか）。" },
-  { pattern: /低遅延|ゲーミング|ゲームモード/, who: "動画やゲームで音のズレが気になる人", check: "低遅延モードが使える接続方法と対応機器。" },
-  { pattern: /IPX?\d|防水|防滴/i, who: "運動中や雨の日にも使いたい人", check: "防水等級（IPX〇）の数字。数字によって耐えられる水の量が違う。" },
-  { pattern: /GaN|窒化ガリウム/i, who: "充電器を小さく軽くしたい人", check: "出力（W数）と、同時に充電できるポートの数。" },
-  { pattern: /急速充電|高速充電|PD対応|PPS/i, who: "充電を待つ時間を短くしたい人", check: "急速充電を活かすには、ケーブルとスマホ側の対応も必要。" },
-  { pattern: /(1\d|[2-9]\d)\d{3}\s*mAh|大容量/i, who: "外出が長い日や旅行に持っていきたい人", check: "容量が大きいほど重くなるので、持ち歩く頻度とのバランス。" },
-  { pattern: /静音/, who: "動作音が気になる場所で使いたい人", check: "動作音の大きさ（dB）が書かれているか。" },
-
-  // --- 最後に調べる ---
-  { pattern: /Nano|ミニ|超小型|コンパクト|軽量/i, who: "荷物を少しでも軽くしたい人", check: "サイズと重さの数値。" },
+  // --- 機能（書き出しには使わない） ---
+  { kind: "feature", pattern: /端子一体|ケーブル内蔵|ケーブル一体|直挿し/, who: "ケーブルを持ち歩くのが面倒な人", check: "本体の端子（USB-C / Lightning）が自分のスマホに合うか。" },
+  { kind: "feature", pattern: /MagSafe|マグセーフ/i, who: "マグネットで充電器やアクセサリーを付けたい人", check: "MagSafe対応の充電器やアクセサリーと組み合わせて使えるか。" },
+  { kind: "feature", pattern: /ノイズキャンセリング|ノイキャン|\bANC\b/i, who: "電車や人の多い場所で音楽を聴く人", check: "ノイズキャンセリングの効き方は環境で変わるので、レビューの声もあわせて。" },
+  { kind: "feature", pattern: /マルチポイント/, who: "スマホとPCを行き来しながら使う人", check: "同時に接続できる台数と、対応している機器。" },
+  { kind: "feature", pattern: /外音取り込み|ヒアスルー|アンビエント/, who: "つけたまま周りの音も聞きたい人", check: "外音取り込みの切り替え方法（ボタンかアプリか）。" },
+  { kind: "feature", pattern: /低遅延|ゲーミング|ゲームモード/, who: "動画やゲームで音のズレが気になる人", check: "低遅延モードが使える接続方法と対応機器。" },
+  { kind: "feature", pattern: /IPX?\d|防水|防滴/i, who: "水まわりや屋外でも使いたい人", check: "防水等級（IPX〇）の数字。数字によって耐えられる水の量が違う。" },
+  { kind: "feature", pattern: /GaN|窒化ガリウム/i, who: "充電器を小さく軽くしたい人", check: "出力（W数）と、同時に充電できるポートの数。" },
+  { kind: "feature", pattern: /急速充電|高速充電|PD対応|PPS/i, who: "充電を待つ時間を短くしたい人", check: "急速充電を活かすには、ケーブルとスマホ側の対応も必要。" },
+  { kind: "feature", pattern: /(1\d|[2-9]\d)\d{3}\s*mAh|大容量/i, who: "外出が長い日や旅行に持っていきたい人", check: "容量が大きいほど重くなるので、持ち歩く頻度とのバランス。" },
+  { kind: "feature", pattern: /静音/, who: "動作音が気になる場所で使いたい人", check: "動作音の大きさ（dB）が書かれているか。" },
+  { kind: "feature", pattern: /Nano|ミニ|超小型|コンパクト|軽量/i, who: "置き場所や持ち運びで困りたくない人", check: "サイズと重さの数値。" },
 ];
 
 // ジャンル全体に当てはまる「向いている人」（キーは config.mjs の genres[].id）
@@ -246,12 +269,18 @@ const GENERIC_CHECKS = [
   "返品や交換の条件。ショップによって違う。",
 ];
 
-// 書き出しの一文。「〇〇そう。」は使わない
+// 書き出しの一文。商品の種類（noun）が分かっているときに使う。「〇〇そう。」は使わない
 const LEAD_TEMPLATES = [
-  (who) => `${who}向けのアイテム。`,
-  (who) => `${who}なら、チェックしておきたい一品。`,
-  (who) => `${who}の選択肢に入れておきたいアイテム。`,
-  (who) => `${who}に向けたアイテム。`,
+  (who, noun) => `${who}向けの${noun}。`,
+  (who, noun) => `${noun}を探している人へ。${who}に向いた一品です。`,
+  (who, noun) => `${who}に向けた${noun}です。`,
+  (who, noun) => `${noun}のなかでも、${who}に向いた一品。`,
+];
+
+// 商品の種類が分からなかったときの書き出し（機能から言えることだけ書く）
+const LEAD_FALLBACKS = [
+  (who) => `${who}に向けた一品。`,
+  (who) => `${who}なら、チェックしておきたい一品です。`,
 ];
 
 // 選んだ基準の一文（config.filter の実際の条件から作る）
@@ -346,7 +375,19 @@ export function buildComment(item, genre) {
   ]);
   const checks = unique([...topics.map((t) => t.check), ...rotate(GENERIC_CHECKS, seed)]);
 
-  const lead = whoList.length ? LEAD_TEMPLATES[seed % LEAD_TEMPLATES.length](whoList[0]) : "";
+  // 書き出しは商品の種類から作る。種類が分からなければ機能から。どちらも無ければ書き出しは付けない
+  // （ジャンル全体の「向いている人」は商品によっては合わないため、書き出しには使わない）
+  const productTopic = topics.find((t) => t.kind === "product");
+  const featureTopic = topics.find((t) => t.kind === "feature");
+  let leadWho = "";
+  let lead = "";
+  if (productTopic) {
+    leadWho = productTopic.who;
+    lead = LEAD_TEMPLATES[seed % LEAD_TEMPLATES.length](leadWho, productTopic.noun);
+  } else if (featureTopic) {
+    leadWho = featureTopic.who;
+    lead = LEAD_FALLBACKS[seed % LEAD_FALLBACKS.length](leadWho);
+  }
   const rank = Number(item.rank);
   const rankText =
     rank >= 1 && rank <= config.rankThreshold ? `${genre.name}のランキングでは${rank}位。` : "";
@@ -367,7 +408,7 @@ export function buildComment(item, genre) {
     return `${spec}（${note}）`;
   });
 
-  const otherWho = whoList.slice(1);
+  const otherWho = whoList.filter((w) => w !== leadWho);
   const stars = Number(item.reviewAverage).toFixed(1);
   const count = Number(item.reviewCount).toLocaleString("ja-JP");
 
