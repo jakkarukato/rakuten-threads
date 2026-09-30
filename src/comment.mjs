@@ -99,12 +99,12 @@ const TOPICS = [
 
 
   // --- 商品の種類：追加分 ---
-  { kind: "product", noun: "テレビ", pattern: /液晶テレビ|有機ELテレビ|4Kテレビ|\d{2}\s*(型|インチ).{0,8}テレビ|テレビ\s*\d{2}\s*(型|インチ)|REGZA|BRAVIA|AQUOS|VIERA/i, who: "テレビを買い替えたい人", check: "部屋の広さに合う画面サイズと、置き場所の幅。録画に使える端子があるか。" },
+  { kind: "product", noun: "テレビ", pattern: /液晶テレビ|有機ELテレビ|4Kテレビ|\d{2}\s*(型|インチ).{0,8}テレビ|テレビ\s*\d{2}\s*(型|インチ)|REGZA|BRAVIA|AQUOS|VIERA/i, who: "大きい画面でテレビや動画を楽しみたい人", check: "部屋の広さに合う画面サイズと、置き場所の幅。録画に使える端子があるか。" },
   { kind: "product", noun: "オフィスソフト", pattern: /Office\s*(Home|Personal|Professional|2\d{3})|Microsoft\s*365|Word.{0,6}Excel/i, who: "WordやExcelを使いたい人", check: "何台まで使えるか、買い切りか1年ごとの契約か。" },
   { kind: "product", noun: "ラベルライター", pattern: /ラベルライター|テプラ|ネームランド/, who: "家の中のものを整理してラベルを貼りたい人", check: "使えるテープの幅と、専用テープの値段。" },
   { kind: "product", first: true, noun: "チェキ用フィルム", pattern: /チェキ用フィルム|instax.{0,12}フィルム|フィルム\s*\d+枚/i, who: "撮った写真をその場でプリントしたい人", check: "手持ちのチェキに合うサイズ（mini・SQUARE・WIDE）と枚数。" },
   { kind: "product", noun: "チェキ", pattern: /チェキ|instax|インスタントカメラ/i, who: "撮った写真をその場で手渡したい人", check: "フィルムの値段（1枚あたり）と、本体の電源の種類。" },
-  { kind: "product", noun: "カードリーダー", pattern: /カードリーダー|カードリーダ\b/, who: "カメラやスマホのデータをパソコンに移したい人", check: "対応するカードの種類と、接続端子（USB-A / USB-C）。" },
+  { kind: "product", first: true, noun: "カードリーダー", pattern: /カードリーダー|カードリーダ\b/, who: "カメラやスマホのデータをパソコンに移したい人", check: "対応するカードの種類と、接続端子（USB-A / USB-C）。" },
   { kind: "product", noun: "インクカートリッジ", pattern: /互換インク|インクカートリッジ|純正インク|トナー/, who: "プリンターのインクを買い足したい人", check: "自分のプリンターの型番に合う品番かどうか。" },
   { kind: "product", noun: "電源タップ", pattern: /電源タップ|延長コード|OAタップ/, who: "机やテレビまわりの配線を整えたい人", check: "口数と全体の長さ、雷ガードやスイッチが付いているか。" },
   { kind: "product", noun: "スマートスピーカー", pattern: /スマートスピーカー|Echo\s*(Dot|Show|Pop)|Google\s*Nest/i, who: "声で家電や音楽を操作したい人", check: "使いたいサービスに対応しているか。" },
