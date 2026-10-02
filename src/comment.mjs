@@ -94,6 +94,7 @@ const TOPICS = [
   { kind: "product", noun: "モバイルバッテリー", pattern: /モバイルバッテリー|Power\s*Bank/i, who: "外出先で充電が切れると困る人", check: "容量（mAh）と、飛行機に持ち込めるかどうか。" },
   { kind: "product", noun: "充電器", pattern: /充電器|急速充電器|ACアダプタ/, who: "充電まわりを整理したい人", check: "出力（W数）と、同時に充電できるポートの数。" },
   { kind: "product", noun: "充電ケーブル", pattern: /ケーブル/i, who: "充電やデータ転送のケーブルを買い替えたい人", check: "両端の端子の組み合わせと長さ、対応する充電の出力（W数）。" },
+  { kind: "product", first: true, noun: "スマホスタンド", pattern: /スマホスタンド|携帯スタンド|スマホホルダー|タブレットスタンド|マルチスタンド|スマホ\s*リング/, who: "動画を見たりビデオ通話をするときにスマホを立てたい人", check: "対応するスマホの重さとサイズ、角度を変えられるか。" },
   { kind: "product", first: true, noun: "カメラ保護フィルム", pattern: /カメラ保護|カメラフィルム|レンズ保護/, who: "スマホのカメラの傷が気になる人", check: "対応機種の型番。似た名前の機種と間違えやすい。" },
   { kind: "product", first: true, noun: "保護フィルム", pattern: /保護フィルム|ガラスフィルム/, who: "画面の傷や割れが心配な人", check: "対応機種の型番と、ケースと干渉しないか。" },
   { kind: "product", first: true, noun: "スマホケース", pattern: /(iPhone|スマホ|Galaxy|Pixel|Android).{0,20}ケース|ケース.{0,10}(iPhone|スマホ)/i, who: "スマホを落としたときの傷や割れが心配な人", check: "対応機種と、カメラ部分やボタンの位置が合うか。" },
