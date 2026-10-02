@@ -387,7 +387,7 @@ const GENRE_TAGS = {
 };
 
 // 商品そのものを表すタグを探す範囲（商品名の先頭からの文字数）
-const HEAD_LENGTH = 36;
+const HEAD_LENGTH = 48;
 
 /**
  * 商品名から関連するハッシュタグを作る。
