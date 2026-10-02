@@ -17,16 +17,16 @@ export const COMMENT = {
   prLabel: "",
 
   // 紹介文全体の文字数（商品情報も含む）
-  minLength: 400,
+  minLength: 430,
   // 無料提供などの商品で【PR】（5文字）を足しても500文字を超えないよう、少し余裕を持たせる
   maxLength: 495,
   // 範囲内の候補が複数あるときは、この文字数に近いものを選ぶ
-  target: 460,
+  target: 490,
 
   // 各見出しに載せる最大数
-  specLimit: 5,
-  whoLimit: 4,
-  checkLimit: 6,
+  specLimit: 6,
+  whoLimit: 5,
+  checkLimit: 8,
 
   // ハッシュタグの最大数。商品から拾えたタグが少なくても、ジャンルのタグで5個以上になるようにする
   tagMin: 5,
