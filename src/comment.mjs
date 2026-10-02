@@ -644,10 +644,11 @@ export function buildComment(item, genre) {
     (rule) => rule.who
   );
 
+  // 商品に合う「こんな人に」が3つ以上あれば、ジャンル全体の候補は使わない
+  const specificWho = unique([...topics.map((t) => t.who), ...extraWho]);
   const whoList = unique([
-    ...topics.map((t) => t.who),
-    ...extraWho,
-    ...(GENRE_AUDIENCE[genre.id] ?? []),
+    ...specificWho,
+    ...(specificWho.length >= 3 ? [] : GENRE_AUDIENCE[genre.id] ?? []),
     Number(item.reviewCount) >= 300 ? "レビューの多い定番から選びたい人" : "",
     Number(item.itemPrice) <= 3000 ? "予算を抑えて選びたい人" : "",
   ]);
