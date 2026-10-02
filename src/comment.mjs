@@ -240,31 +240,142 @@ const TAG_RULES = [
   { scope: "full", pattern: /大容量/, tags: ["#大容量"] },
   { scope: "full", pattern: /Nano|ミニ|超小型|コンパクト|軽量/i, tags: ["#コンパクト"] },
 ];
-
-// メーカー名。商品名に出てきたものだけ付ける
+// メーカー名・シリーズ名。商品名の先頭のほうに出てきたものだけ付ける（最大2つ）。
+// 上から順に見るので、会社名を先、シリーズ名を後ろに並べる。
 const BRAND_TAGS = [
-  [/\bAnker\b/i, "#Anker"],
+  // --- スマホアクセサリー ---
+  [/iFace/i, "#iFace"],
+  [/Spigen|シュピゲン/i, "#Spigen"],
+  [/\bESR\b/i, "#ESR"],
   [/TORRAS/i, "#TORRAS"],
-  [/エレコム|ELECOM/i, "#エレコム"],
-  [/バッファロー|BUFFALO/i, "#バッファロー"],
-  [/SanDisk|サンディスク/i, "#SanDisk"],
-  [/ロジクール|Logicool/i, "#ロジクール"],
-  [/アイリスオーヤマ|アイリスプラザ|IRIS\s*OHYAMA/i, "#アイリスオーヤマ"],
-  [/recolte|レコルト/i, "#レコルト"],
-  [/SOUNDPEATS/i, "#SOUNDPEATS"],
-  [/EarFun/i, "#EarFun"],
-  [/\bJBL\b/i, "#JBL"],
-  [/\bBOSE\b/i, "#BOSE"],
-  [/\bSONY\b|ソニー/i, "#ソニー"],
-  [/シャープ|SHARP/i, "#シャープ"],
-  [/パナソニック|Panasonic/i, "#パナソニック"],
-  [/Xiaomi|シャオミ/i, "#Xiaomi"],
+  [/NIMASO/i, "#NIMASO"],
+  [/PITAKA/i, "#PITAKA"],
+  [/Simplism|シンプリズム/i, "#Simplism"],
+  [/ラスタバナナ/, "#ラスタバナナ"],
+  [/オウルテック|Owltech/i, "#オウルテック"],
+  [/\bBelkin\b|ベルキン/i, "#Belkin"],
+  [/\bCIO\b/, "#CIO"],
   [/UGREEN/i, "#UGREEN"],
   [/Baseus/i, "#Baseus"],
+  [/AUKEY/i, "#AUKEY"],
+  [/MOTTERU|モッテル/i, "#MOTTERU"],
+
+  // --- オーディオ ---
+  [/\bAnker\b/i, "#Anker"],
+  [/SOUNDPEATS/i, "#SOUNDPEATS"],
+  [/EarFun/i, "#EarFun"],
   [/AVIOT/i, "#AVIOT"],
-  [/\bCIO\b/, "#CIO"],
+  [/Shokz|ショックス/i, "#Shokz"],
+  [/\bJabra\b/i, "#Jabra"],
+  [/\bJBL\b/i, "#JBL"],
+  [/\bBOSE\b/i, "#BOSE"],
+  [/オーディオテクニカ|audio-?technica/i, "#オーディオテクニカ"],
+  [/ゼンハイザー|Sennheiser/i, "#ゼンハイザー"],
+  [/\bTribit\b/i, "#Tribit"],
+  [/Edifier/i, "#Edifier"],
+  [/\bfinal\b.{0,10}(イヤホン|ヘッドホン)/i, "#final"],
+  [/\bBeats\b/i, "#Beats"],
+  [/Nothing\s*(Ear|Phone)/i, "#Nothing"],
+
+  // --- テレビ・映像・カメラ ---
+  [/ハイセンス|Hisense/i, "#ハイセンス"],
+  [/\bTCL\b/, "#TCL"],
+  [/maxzen|マクスゼン/i, "#maxzen"],
+  [/オリオン|\bORION\b/i, "#オリオン"],
+  [/富士フイルム|FUJIFILM/i, "#富士フイルム"],
+  [/\bNikon\b|ニコン/i, "#Nikon"],
+  [/\bGoPro\b/i, "#GoPro"],
+  [/\bDJI\b/, "#DJI"],
+
+  // --- PC・周辺機器 ---
+  [/バッファロー|BUFFALO/i, "#バッファロー"],
+  [/エレコム|ELECOM/i, "#エレコム"],
+  [/ロジクール|Logicool|Logitech/i, "#ロジクール"],
+  [/SanDisk|サンディスク/i, "#SanDisk"],
+  [/KIOXIA|キオクシア/i, "#KIOXIA"],
+  [/Samsung|サムスン/i, "#Samsung"],
+  [/Crucial|クルーシャル/i, "#Crucial"],
+  [/Transcend|トランセンド/i, "#Transcend"],
+  [/Seagate|シーゲイト/i, "#Seagate"],
+  [/ウエスタンデジタル|Western\s*Digital|\bWD\b/i, "#WD"],
+  [/TP-?Link/i, "#TPLink"],
+  [/アイ・?オー・?データ|IODATA|I-O\s*DATA/i, "#IODATA"],
+  [/エプソン|EPSON/i, "#エプソン"],
+  [/キヤノン|キャノン|\bCanon\b/i, "#キヤノン"],
+  [/ブラザー|brother/i, "#ブラザー"],
+  [/キングジム/, "#キングジム"],
+  [/マイクロソフト|Microsoft/i, "#マイクロソフト"],
+  [/\bASUS\b|エイスース/i, "#ASUS"],
+  [/\bLenovo\b|レノボ/i, "#Lenovo"],
+  [/\bDell\b|デル\b/i, "#Dell"],
+  [/富士通|FUJITSU/i, "#富士通"],
+  [/\bNEC\b/i, "#NEC"],
+  [/ノートン|Norton/i, "#ノートン"],
+  [/\bESET\b/i, "#ESET"],
+  [/マカフィー|McAfee/i, "#マカフィー"],
+  [/ウイルスバスター|トレンドマイクロ/i, "#ウイルスバスター"],
+
+  // --- 家電 ---
+  [/パナソニック|Panasonic/i, "#パナソニック"],
+  [/シャープ|SHARP/i, "#シャープ"],
+  [/日立|HITACHI/i, "#日立"],
+  [/東芝|TOSHIBA/i, "#東芝"],
+  [/三菱電機|三菱/, "#三菱電機"],
+  [/アイリスオーヤマ|アイリスプラザ|IRIS\s*OHYAMA/i, "#アイリスオーヤマ"],
+  [/コロナ(?!対策|ウイルス)|\bCORONA\b/i, "#コロナ"],
+  [/ダイキン|DAIKIN/i, "#ダイキン"],
+  [/バルミューダ|BALMUDA/i, "#バルミューダ"],
+  [/ダイソン|Dyson/i, "#ダイソン"],
+  [/シロカ|siroca/i, "#シロカ"],
+  [/ツインバード|TWINBIRD/i, "#ツインバード"],
+  [/象印|ZOJIRUSHI/i, "#象印"],
+  [/タイガー魔法瓶|タイガー|TIGER/i, "#タイガー"],
+  [/デロンギ|DeLonghi/i, "#デロンギ"],
+  [/recolte|レコルト/i, "#レコルト"],
+  [/BRUNO|ブルーノ/i, "#BRUNO"],
+  [/アラジン|Aladdin/i, "#アラジン"],
+  [/コイズミ|KOIZUMI/i, "#コイズミ"],
+  [/スリーアップ/, "#スリーアップ"],
   [/山善|YAMAZEN/i, "#山善"],
+  [/ドリテック|dretec/i, "#ドリテック"],
+  [/マキタ|makita/i, "#マキタ"],
+  [/レイコップ|raycop/i, "#レイコップ"],
+  [/SwitchBot/i, "#SwitchBot"],
+  [/タニタ|TANITA/i, "#タニタ"],
+  [/オムロン|OMRON/i, "#オムロン"],
+  [/テスコム|TESCOM/i, "#テスコム"],
+  [/クレイツ|CREATE\s*ION/i, "#クレイツ"],
+  [/ヤーマン|YA-?MAN/i, "#ヤーマン"],
+  [/リファ|ReFa/i, "#ReFa"],
+  [/ハイアール|Haier/i, "#ハイアール"],
+  [/\bAQUA\b|アクア\b/i, "#AQUA"],
+  [/simplus|シンプラス/i, "#simplus"],
+
+  // --- その他 ---
+  [/\bApple\b|アップル/i, "#Apple"],
+  [/Xiaomi|シャオミ/i, "#Xiaomi"],
+  [/HUAWEI|ファーウェイ/i, "#HUAWEI"],
   [/\bAmazon\b|アマゾン/i, "#Amazon"],
+  [/Nintendo|任天堂/i, "#Nintendo"],
+  [/ALLDOCUBE/i, "#ALLDOCUBE"],
+
+  // --- シリーズ名（会社名のあとに付ける） ---
+  [/Soundcore|サウンドコア/i, "#Soundcore"],
+  [/\bEufy\b|ユーフィ/i, "#Eufy"],
+  [/AirPods/i, "#AirPods"],
+  [/dynabook/i, "#dynabook"],
+  [/ThinkPad/i, "#ThinkPad"],
+  [/\bREGZA\b|レグザ/i, "#REGZA"],
+  [/BRAVIA|ブラビア/i, "#BRAVIA"],
+  [/AQUOS|アクオス/i, "#AQUOS"],
+  [/VIERA|ビエラ/i, "#VIERA"],
+  [/ドルツ|Doltz/i, "#ドルツ"],
+  [/ソニッケアー|Sonicare/i, "#ソニッケアー"],
+  [/エネループ|eneloop/i, "#エネループ"],
+  [/プラズマクラスター/, "#プラズマクラスター"],
+  [/ナノケア/, "#ナノケア"],
+  [/ヘルシオ|HEALSIO/i, "#ヘルシオ"],
+  [/\bSONY\b|ソニー/i, "#ソニー"],
 ];
 
 // ジャンルごとのタグ（商品から拾えたタグが少ないときの補い。config.mjs の genres[].tag とは別）
@@ -300,8 +411,11 @@ export function buildTags(item, genre) {
   if (!productTags.length) productTags = pick(raw, "head");
   const matched = [...productTags, ...pick(raw, "full")];
 
-  const brand = BRAND_TAGS.find(([pattern]) => pattern.test(head));
-  const specific = unique([...matched, brand ? brand[1] : "", genre.tag]);
+  // メーカー名とシリーズ名（iFace、コロナ、Soundcore など）。多すぎないよう2つまで
+  const brands = BRAND_TAGS.filter(([pattern]) => pattern.test(head))
+    .slice(0, 2)
+    .map(([, tag]) => tag);
+  const specific = unique([...matched, ...brands, genre.tag]);
 
   // ジャンルのタグは、足りないときだけ補う（関係の薄いタグを増やさないため）
   const fillers = (GENRE_TAGS[genre.id] ?? []).filter((tag) => !specific.includes(tag));
