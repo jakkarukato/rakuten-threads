@@ -607,6 +607,16 @@ function normalizeNoun(word) {
 }
 
 /**
+ * 商品名のかなり後ろで見つかった種類かどうか。
+ * 後ろのほうには「対応機器」「付属品」が並ぶので、そこから決めた種類は当たっていないことがある。
+ */
+function deepMatch(itemName, found) {
+  const clean = cleanItemName(String(itemName ?? ""), 300);
+  const pos = clean.indexOf(found.match);
+  return pos === -1 ? found.index > 60 : pos > 40;
+}
+
+/**
  * 商品の種類を1つに決める。
  * ・first: true の種類（ケースやフィルムなどのアクセサリー）が商品名の先頭にあれば、それを使う
  * ・それ以外は、商品名のいちばん前に出てきた種類を使う（後ろに並ぶ「対応機器」や付属品を拾わないため）
@@ -763,7 +773,7 @@ export function buildComment(item, genre) {
     warnings.push(
       "商品の種類が分かりませんでした。最初の一文と見出しが商品に合っているか確かめてください。"
     );
-  } else if (!productTopic.first && found.index > 24) {
+  } else if (!productTopic.first && deepMatch(item.itemName, found)) {
     // 商品名の後ろのほうで見つけた種類は、対応機器や付属品のことがある
     const shown = productTopic.noun === "$match" ? normalizeNoun(found.match) : productTopic.noun;
     warnings.push(
