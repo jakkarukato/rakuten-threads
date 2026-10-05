@@ -756,5 +756,27 @@ export function buildComment(item, genre) {
 
   let text = chosen.text;
   if (text.length > COMMENT.maxLength) text = text.slice(0, COMMENT.maxLength - 1) + "…";
-  return { name, text };
+
+  // 投稿する前に見直したほうがよいものを知らせる
+  const nounOf = (topic) => {
+    if (topic.noun !== "$match") return topic.noun;
+    const m = String(item.itemName ?? "").match(topic.pattern);
+    return m ? normalizeNoun(m[0]) : "";
+  };
+  const others = unique(
+    matched
+      .filter((t) => t.kind === "product" && t !== productTopic)
+      .map(nounOf)
+      .filter((n) => n && n !== (productTopic ? nounOf(productTopic) : ""))
+  );
+  const warnings = [];
+  if (!productTopic) {
+    warnings.push("商品の種類が分かりませんでした。最初の一文と見出しが商品に合っているか確かめてください。");
+  } else if (others.length) {
+    warnings.push(
+      `「${others.join("・")}」とも読める商品名です。「${nounOf(productTopic)}」で合っているか確かめてください。`
+    );
+  }
+
+  return { name, text, warnings };
 }

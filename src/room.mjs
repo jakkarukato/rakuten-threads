@@ -100,7 +100,7 @@ function plainItemUrl(item) {
 }
 
 // ---------- ページ ----------
-function renderCard({ genre, item, name, comment }, index) {
+function renderCard({ genre, item, name, comment, warnings = [] }, index) {
   const image = imageUrlOf(item);
   const link = plainItemUrl(item);
   const rows = Math.min(26, comment.split("\n").length + 1);
@@ -116,6 +116,7 @@ function renderCard({ genre, item, name, comment }, index) {
         <p class="price">${escapeHtml(yen(item.itemPrice))}<span>★${Number(item.reviewAverage).toFixed(1)}（${Number(item.reviewCount)}件）</span></p>
       </div>
     </div>
+    ${warnings.length ? `<p class="warn">⚠ ${warnings.map(escapeHtml).join(" ")}</p>` : ""}
     <textarea id="c${index}" rows="${rows}" readonly>${escapeHtml(comment)}</textarea>
     <label class="pr-toggle"><input type="checkbox" data-pr="c${index}"> 無料提供・イベント参加・お試しクーポン利用の商品（【PR】を付ける）</label>
     <div class="actions">
@@ -157,6 +158,7 @@ function renderPage(picks, generatedAt) {
   .price { margin: 0; font-weight: 700; }
   .price span { font-weight: 400; color: var(--sub); margin-left: .5rem; font-size: .9rem; }
   textarea { width: 100%; margin-top: .75rem; padding: .6rem; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; font-size: .88rem; resize: vertical; }
+  .warn { margin: .6rem 0 0; padding: .5rem .6rem; border-radius: 8px; background: #fff4d6; color: #7a5200; font-size: .85rem; line-height: 1.5; }
   .pr-toggle { display: flex; gap: .4rem; align-items: center; margin-top: .5rem; font-size: .85rem; color: var(--sub); }
   .actions { display: flex; gap: .5rem; margin-top: .5rem; }
   .actions button, .actions a { flex: 1; text-align: center; padding: .7rem .5rem; border-radius: 8px; font: inherit; font-size: .92rem; font-weight: 600; text-decoration: none; cursor: pointer; }
@@ -263,8 +265,8 @@ async function main() {
         const list = lists[(offset + i) % lists.length];
         const item = list.items[round];
         if (!item) continue;
-        const { name, text } = buildComment(item, list.genre);
-        picks.push({ genre: list.genre, item, name, comment: text });
+        const { name, text, warnings } = buildComment(item, list.genre);
+        picks.push({ genre: list.genre, item, name, comment: text, warnings });
       }
     }
   }
@@ -299,6 +301,12 @@ async function main() {
   await writeFile(SHOWN_PATH, JSON.stringify(updated, null, 2) + "\n", "utf-8");
 
   console.log(`\n候補 ${picks.length}件でページを作りました: docs/room/index.html`);
+  const flagged = picks.filter((p) => p.warnings?.length);
+  if (flagged.length) {
+    console.log(`\n★ 投稿前に見直したい商品 ${flagged.length}件`);
+    for (const p of flagged) console.log(`  - ${p.name}: ${p.warnings.join(" ")}`);
+  }
+
   for (const { genre, name, comment } of picks) {
     console.log(`\n----- [${genre.name}] ${name} -----`);
     console.log(comment);
