@@ -758,23 +758,16 @@ export function buildComment(item, genre) {
   if (text.length > COMMENT.maxLength) text = text.slice(0, COMMENT.maxLength - 1) + "…";
 
   // 投稿する前に見直したほうがよいものを知らせる
-  const nounOf = (topic) => {
-    if (topic.noun !== "$match") return topic.noun;
-    const m = String(item.itemName ?? "").match(topic.pattern);
-    return m ? normalizeNoun(m[0]) : "";
-  };
-  const others = unique(
-    matched
-      .filter((t) => t.kind === "product" && t !== productTopic)
-      .map(nounOf)
-      .filter((n) => n && n !== (productTopic ? nounOf(productTopic) : ""))
-  );
   const warnings = [];
   if (!productTopic) {
-    warnings.push("商品の種類が分かりませんでした。最初の一文と見出しが商品に合っているか確かめてください。");
-  } else if (others.length) {
     warnings.push(
-      `「${others.join("・")}」とも読める商品名です。「${nounOf(productTopic)}」で合っているか確かめてください。`
+      "商品の種類が分かりませんでした。最初の一文と見出しが商品に合っているか確かめてください。"
+    );
+  } else if (!productTopic.first && found.index > 24) {
+    // 商品名の後ろのほうで見つけた種類は、対応機器や付属品のことがある
+    const shown = productTopic.noun === "$match" ? normalizeNoun(found.match) : productTopic.noun;
+    warnings.push(
+      `商品名の後ろのほうにある「${found.match}」から「${shown}」と判断しました。合っているか確かめてください。`
     );
   }
 
