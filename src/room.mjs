@@ -218,6 +218,17 @@ ${cards}
 
 // ---------- 本体 ----------
 async function main() {
+  // GitHub側の不調で朝の実行が失敗することがあるため、少しあとにもう一度動かしている。
+  // すでに今日のページができていれば、何もしないで終わる（FORCE_UPDATE=1 で作り直せる）。
+  if (!process.env.FORCE_UPDATE) {
+    const today = jstDateLabel(new Date());
+    const current = await readFile(PAGE_PATH, "utf-8").catch(() => "");
+    if (current.includes(`${today} 更新`)) {
+      console.log(`今日（${today}）のページはもうできています。何もしません。`);
+      return;
+    }
+  }
+
   const shown = await loadShown();
   const cutoff = Date.now() - ROOM.skipDays * 86_400_000;
   const recent = new Set(
