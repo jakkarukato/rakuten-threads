@@ -1534,5 +1534,47 @@
     "name": "COSORI DCモーター搭載",
     "genre": "家電",
     "shownAt": "2026-10-10T21:09:56.547Z"
+  },
+  {
+    "itemCode": "huawei-official:10000516",
+    "name": "ワイヤレスイヤホン HUAWEI",
+    "genre": "オーディオ・カメラ",
+    "shownAt": "2026-10-12T00:14:40.765Z"
+  },
+  {
+    "itemCode": "mycosmeticbox:10000390",
+    "name": "キヌージョ ストレートアイロン Kinujo ストレートアイロン KINUJO",
+    "genre": "家電",
+    "shownAt": "2026-10-12T00:14:40.765Z"
+  },
+  {
+    "itemCode": "hanaro:10000896",
+    "name": "iPhone17 ケース 手帳型",
+    "genre": "スマホ・タブレット",
+    "shownAt": "2026-10-12T00:14:40.765Z"
+  },
+  {
+    "itemCode": "nissin-lux:10000584",
+    "name": "外付けHDD 160GB 250GB",
+    "genre": "PC・周辺機器",
+    "shownAt": "2026-10-12T00:14:40.765Z"
+  },
+  {
+    "itemCode": "mixiofficial:10000046",
+    "name": "みてねアプリ専用 デジタルフォトフレーム みてねおもいでフォトフレーム WiFi対応/QRコードで簡単設定/タッチスク…",
+    "genre": "オーディオ・カメラ",
+    "shownAt": "2026-10-12T00:14:40.765Z"
+  },
+  {
+    "itemCode": "quads:10000095",
+    "name": "スチーム加湿器 GLASS グラス",
+    "genre": "家電",
+    "shownAt": "2026-10-12T00:14:40.765Z"
+  },
+  {
+    "itemCode": "yamada-denki:10652508",
+    "name": "BUFFALO WSR3600BE4PBK",
+    "genre": "PC・周辺機器",
+    "shownAt": "2026-10-12T00:14:40.765Z"
   }
 ]
