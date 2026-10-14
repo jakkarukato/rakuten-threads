@@ -1696,5 +1696,65 @@
     "name": "パナソニック EH-NE2K-W",
     "genre": "家電",
     "shownAt": "2026-10-14T00:09:40.859Z"
+  },
+  {
+    "itemCode": "tabletpckoubou:10001261",
+    "name": "10インチ タブレット Android16",
+    "genre": "スマホ・タブレット",
+    "shownAt": "2026-10-14T23:43:19.781Z"
+  },
+  {
+    "itemCode": "onestep:10068649",
+    "name": "コピー用紙 A4 5000枚 高白色",
+    "genre": "PC・周辺機器",
+    "shownAt": "2026-10-14T23:43:19.781Z"
+  },
+  {
+    "itemCode": "spd-shop:10001992",
+    "name": "マイクロsdカード microSDXC",
+    "genre": "オーディオ・カメラ",
+    "shownAt": "2026-10-14T23:43:19.781Z"
+  },
+  {
+    "itemCode": "milicute-himawari:10000007",
+    "name": "クーポンで最安2,975円 30冠達成！ 髭剃り",
+    "genre": "家電",
+    "shownAt": "2026-10-14T23:43:19.781Z"
+  },
+  {
+    "itemCode": "anker:10001561",
+    "name": "Anker Nano Power Bank",
+    "genre": "スマホ・タブレット",
+    "shownAt": "2026-10-14T23:43:19.781Z"
+  },
+  {
+    "itemCode": "hikaritv:10259140",
+    "name": "I-ODATA USB3.1 Gen1対応",
+    "genre": "PC・周辺機器",
+    "shownAt": "2026-10-14T23:43:19.781Z"
+  },
+  {
+    "itemCode": "plaud:10000028",
+    "name": "Plaud NotePin S",
+    "genre": "オーディオ・カメラ",
+    "shownAt": "2026-10-14T23:43:19.781Z"
+  },
+  {
+    "itemCode": "rcmdin:10466434",
+    "name": "炊飯器 4合炊き マイコン式 炊飯ジャー",
+    "genre": "家電",
+    "shownAt": "2026-10-14T23:43:19.781Z"
+  },
+  {
+    "itemCode": "tcl-flagship:10000000",
+    "name": "TCL C1 ポータブルプロジェクター 小型 Google",
+    "genre": "オーディオ・カメラ",
+    "shownAt": "2026-10-14T23:43:19.781Z"
+  },
+  {
+    "itemCode": "chouchou-store:10001143",
+    "name": "クレイツ カールプロSR 26mm",
+    "genre": "家電",
+    "shownAt": "2026-10-14T23:43:19.781Z"
   }
 ]
